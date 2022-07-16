@@ -3,8 +3,16 @@
 
 #include "../desktop_i.h"
 #include "desktop_view_lock_menu.h"
+#include "desktop/desktop_settings/desktop_settings_app.h"
 
 #define LOCK_MENU_ITEMS_NB 4
+
+static void desktop_view_lock_menu_dumbmode_changed(bool isThisGameMode) {
+    DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
+    LOAD_DESKTOP_SETTINGS(&app->settings); 
+    app->settings.is_dumbmode = isThisGameMode;
+    SAVE_DESKTOP_SETTINGS(&app->settings);
+}
 
 void desktop_lock_menu_set_callback(
     DesktopLockMenuView* lock_menu,
@@ -56,7 +64,9 @@ static void lock_menu_callback(void* context, uint8_t index) {
                 model->hint_timeout = HINT_TIMEOUT;
                 return true;
             });
-        // ENTER CODE TO UPDATE SETTING
+        desktop_view_lock_menu_dumbmode_changed(1);
+        osDelay(500);
+        lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
         break;
     default: // wip message
         with_view_model(
@@ -69,7 +79,8 @@ static void lock_menu_callback(void* context, uint8_t index) {
 }
 
 void desktop_lock_menu_render(Canvas* canvas, void* model) {
-    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {"Lock", "Lock with PIN", "DUMB Mode", "GAMES ONLY"};
+    const char* Lockmenu_Items[LOCK_MENU_ITEMS_NB] = {
+        "Lock", "Lock with PIN", "DUMB Mode", "GAMES ONLY"};
 
     DesktopLockMenuViewModel* m = model;
     canvas_clear(canvas);
@@ -85,8 +96,7 @@ void desktop_lock_menu_render(Canvas* canvas, void* model) {
         if(m->hint_timeout && m->idx == 2 && m->idx == i) {
             str = "Not Implemented";
         } else if(m->hint_timeout && m->idx == 3 && m->idx == i) {
-            // str = "UUDDLCLC For Main";
-            str = "Not Implemented";
+            str = "UUDDLCLC For Main";
         }
         if(str != NULL) {
             canvas_draw_str_aligned(

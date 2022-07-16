@@ -9,6 +9,9 @@
 import os
 
 DefaultEnvironment(tools=[])
+
+EnsurePythonVersion(3, 8)
+
 # Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
 
 
@@ -32,7 +35,9 @@ coreenv["ROOT_DIR"] = Dir(".")
 # Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone(
     tools=["fbt_dist", "openocd", "blackmagic"],
-    OPENOCD_GDB_PIPE=["|openocd -c 'gdb_port pipe' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"],
+    OPENOCD_GDB_PIPE=[
+        "|openocd -c 'gdb_port pipe; log_output debug/openocd.log' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"
+    ],
     GDBOPTS_BASE=[
         "-ex",
         "target extended-remote ${GDBREMOTE}",
@@ -136,6 +141,18 @@ if GetOption("fullenv"):
 basic_dist = distenv.DistCommand("fw_dist", distenv["DIST_DEPENDS"])
 distenv.Default(basic_dist)
 
+dist_dir = distenv.GetProjetDirName()
+plugin_dist = [
+    distenv.Install(
+        f"#/dist/{dist_dir}/plugins/debug", firmware_env["FW_EXTAPPS"]["debug"]
+    ),
+    distenv.Install(
+        f"#/dist/{dist_dir}/plugins", firmware_env["FW_EXTAPPS"]["compact"]
+    ),
+]
+Alias("plugin_dist", plugin_dist)
+# distenv.Default(plugin_dist)
+
 # Target for bundling core2 package for qFlipper
 copro_dist = distenv.CoproBuilder(
     distenv.Dir("assets/core2_firmware"),
@@ -145,6 +162,8 @@ distenv.Alias("copro_dist", copro_dist)
 
 firmware_flash = distenv.AddOpenOCDFlashTarget(firmware_env)
 distenv.Alias("flash", firmware_flash)
+if distenv["FORCE"]:
+    distenv.AlwaysBuild(firmware_flash)
 
 firmware_bm_flash = distenv.PhonyTarget(
     "flash_blackmagic",

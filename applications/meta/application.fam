@@ -24,6 +24,7 @@ App(
         "subghz",
         "bad_usb",
         "u2f",
+        "elf_loader",
         "totp",
     ],
 )
@@ -33,6 +34,11 @@ App(
     name="Basic applications for plug-in menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
+        "INTAPP_HIDAnalyzer",
+        "INTAPP_Picopass",
+        "INTAPP_MouseJacker",
+        "INTAPP_NRFSniff",
+        "INTAPP_TouchTunes",
         "bt_hid",
         "hid_anal",
         "music_player",
@@ -53,16 +59,10 @@ App(
     name="Custom applications for games menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "game_2048",
-        "arkanoid_game",
-        "chess_game",
-        "dice_game",
-        "snake_game",
-        "tanks_game",
-        "tetris_game",
-        "tictactoe_game",
-        "videopoker_game",
-        "flappy_game","gameoflife_game","raycast_game",
+        "INTAPP_Tanks",
+        "INTAPP_GameOfLife",
+        "INTAPP_Raycast",
+        "INTAPP_Tetris",
     ],
 )
 
@@ -71,7 +71,35 @@ App(
     name="Custom applications for main menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "clock",
-        "unirfremix",
+        "Clock",
+        "UniRFRemix",
+    ],
+)
+
+App(
+    appid="external_apps",
+    name="Custom applications for main menu",
+    apptype=FlipperAppType.METAPACKAGE,
+    provides=[
+        "INTAPP_Tanks",
+        "INTAPP_GameOfLife",
+        "INTAPP_Raycast",
+        "INTAPP_Tetris",
+        "INTAPP_HIDAnalyzer",
+        "INTAPP_Picopass",
+        "INTAPP_MouseJacker",
+        "INTAPP_NRFSniff",
+        "INTAPP_TouchTunes",
+        "INTAPP_WiFiScanner",
+		"INTAPP_Chip8","INTAPP_Chess",
+        "Clock",
+        "UniRFRemix",
+        "APPS_WAVPlayer",
+        "APPS_SpectrumAnalyzer","APPS_BluetoothRemote","APPS_DolphinRestorer",
+		"APPS_DolphinBackup","GAME_MandelbrotSet","APPS_MusicPlayer",
+        "APPS_SentrySafe","APPS_BarcodeGenerator","APPS_MouseJiggler",
+        "GAME_2048","GAME_Arkanoid","GAME_Dice",
+		"GAME_Snake","GAME_TicTacToe",
+        "GAME_VideoPoker","GAME_FlappyBird",
     ],
 )

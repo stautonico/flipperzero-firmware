@@ -29,6 +29,12 @@ SECTIONS
 		*(COMMON)
 	}
 
+	.ARM.attributes : 
+	{
+		*(.ARM.attributes)
+		*(.ARM.attributes.*)	
+	}
+
 	/DISCARD/ :
 	{
 		*(.comment)
