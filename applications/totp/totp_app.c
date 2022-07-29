@@ -1,206 +1,105 @@
-#include <furi.h>
-#include <furi_hal.h>
-
-#include <gui/gui.h>
-#include <input/input.h>
-
-#include <notification/notification_messages.h>
-
 #include "totp_app.h"
 
-#include <base32.h>
-#include <time.h>
+#include "totp_app_i.h"
 
-#include <toolbox/path.h>
-#include <flipper_format/flipper_format.h>
+#include "totp_helpers.h"
 
-static const char* totp_file_header = "Flipper TOTP storage";
-static const uint32_t totp_file_version = 1;
-
-typedef enum {
-    TotpEventTypeTick,
-    TotpEventTypeInput,
-} TotpEventType;
-
-typedef struct {
-    TotpEventType type;
-    InputEvent input;
-    uint32_t code;
-} TotpEvent;
-
-uint8_t keyId = 0;
-uint8_t keys = 3;
-uint8_t* base32key[] = {
-    (unsigned char*)"JBSWY3DPEHPK3PXP",
-    (unsigned char*)"AMOGUSYOBABOBAAA",
-    (unsigned char*)"AMOGUSAAAAAAAAAA"};
-const char* keyNames[] = {"Test Key 1", "Test Key 2", "Amogus key"};
-
-int keyLengths[] = {10, 10, 10};
-
-static void totp_app_draw_callback(Canvas* canvas, void* ctx) {
-    osMessageQueueId_t event_queue = ctx;
-    TotpEvent event;
-    osMessageQueueGet(event_queue, &event, NULL, osWaitForever);
-
-    uint8_t hmacKey[20];
-
-    int timezone = -3;
-
-    canvas_clear(canvas);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 10, "TOTP");
-    canvas_draw_str(canvas, 2, 30, keyNames[keyId]);
-
-    //FURI_LOG_I("TOTP", "key is %s", base32key[keyId]);
-
-    base32_decode(base32key[keyId], hmacKey, keyLengths[keyId]);
-    //FURI_LOG_I("TOTP", "len = %d", len);
-
-    //uint8_t hmacKey[] = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x21, 0xde, 0xad, 0xbe, 0xef}; // Secret key
-    TOTP(hmacKey, keyLengths[keyId], 30); // Secret key, Secret key length, Timestep (30s)
-
-    FuriHalRtcDateTime datetime = {0};
-    furi_hal_rtc_get_datetime(&datetime);
-
-    struct tm date = {0};
-    date.tm_hour = datetime.hour + timezone;
-    date.tm_min = datetime.minute;
-    date.tm_sec = datetime.second;
-    date.tm_mday = datetime.day;
-    date.tm_mon = datetime.month - 1;
-    date.tm_year = datetime.year - 1900;
-    // god i hate these 5 lines
-
-    uint32_t newCode = getCodeFromTimestamp(mktime(&date));
-    //FURI_LOG_I("TOTP", "%06ld", newCode);
-    char code_string[100] = "";
-    sprintf(code_string, "%06ld", newCode);
-    canvas_draw_str(canvas, 2, 20, code_string);
-    sprintf(code_string, "%d seconds left", 29 - date.tm_sec % 30);
-    canvas_draw_str(canvas, 2, 40, code_string);
-    sprintf(
-        code_string,
-        "%02d:%02d:%02d %02d-%02d-%04d",
-        datetime.hour + timezone,
-        datetime.minute,
-        datetime.second,
-        datetime.day,
-        datetime.month,
-        datetime.year);
-    canvas_draw_str(canvas, 2, 50, code_string);
-    canvas_draw_box(canvas, 0, 52, (29 - (date.tm_sec % 30)) * 4.414, 10);
+static void totp_start_menu_callback(void* context, uint32_t index) {
+    // Do something when pressing one of the keys on the start menu
 }
 
-static void totp_app_input_callback(InputEvent* input_event, void* ctx) {
-    furi_assert(ctx);
-    osMessageQueueId_t event_queue = ctx;
-
-    TotpEvent event = {.type = TotpEventTypeInput, .input = *input_event};
-    osMessageQueuePut(event_queue, &event, 0, osWaitForever);
+// Navigation callbacks
+static uint32_t totp_previous_callback(void* context) {
+    // Return to the start menu from the key menu
+    UNUSED(context);
+    return TotpViewStart;
 }
 
-void totp_app_update(void* ctx) {
-    furi_assert(ctx);
-    osMessageQueueId_t event_queue = ctx;
-    TotpEvent event = {.type = TotpEventTypeTick};
-    osMessageQueuePut(event_queue, &event, 0, 0);
+static uint32_t totp_exit_callback(void* context) {
+    // Exit the app if we hit back from the start menu
+    UNUSED(context);
+    return VIEW_NONE;
+}
+
+TotpApp* totp_app_alloc() {
+    FURI_LOG_D("totp", "totp_app_alloc::Allocating app");
+    TotpApp* app = malloc(sizeof(TotpApp));
+
+    View* view = NULL;
+
+    // Initialize/allocate basic graphics items
+    FURI_LOG_D("totp", "totp_app_alloc::Setting up GUI and view dispatcher");
+    app->gui = furi_record_open("gui");
+    app->view_dispatcher = view_dispatcher_alloc();
+    view_dispatcher_enable_queue(app->view_dispatcher);
+    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+
+    // Setup our views
+    FURI_LOG_D("totp", "totp_app_alloc::Allocating view");
+    app->view_totp = view_totp_alloc();
+    view = view_totp_get_view(app->view_totp);
+    view_set_previous_callback(view, totp_previous_callback);
+    view_dispatcher_add_view(app->view_dispatcher, TotpViewKey, view);
+
+    FURI_LOG_D("totp", "totp_app_alloc::Setting up VIL");
+    // Set up our variable list for the start menu
+    //    app->variable_item_list = variable_item_list_alloc();
+    //    view = variable_item_list_get_view(app->variable_item_list);
+    //    view_set_previous_callback(view, totp_exit_callback);
+    //    view_dispatcher_add_view(app->view_dispatcher, TotpViewStart, view);
+
+    // Setup our "submenu" (start menu)
+    app->submenu = submenu_alloc();
+    view = submenu_get_view(app->submenu);
+    view_set_previous_callback(view, totp_exit_callback);
+    view_dispatcher_add_view(app->view_dispatcher, TotpViewStart, view);
+
+    // Make our list of keys
+    FURI_LOG_D("totp", "totp_app_alloc::Making our key list");
+    totp_make_key_list(app);
+
+    FURI_LOG_D("totp", "totp_app_alloc::Done allocating!");
+    return app;
+}
+
+void totp_app_free(TotpApp* app) {
+    // Remove our views
+    view_dispatcher_remove_view(app->view_dispatcher, TotpViewStart);
+    view_dispatcher_remove_view(app->view_dispatcher, TotpViewKey);
+
+    //    variable_item_list_free(app->variable_item_list);
+
+    view_totp_free(app->view_totp);
+
+    // Free our graphics items
+    view_dispatcher_free(app->view_dispatcher);
+    furi_record_close("gui");
+
+    free(app);
+}
+
+int32_t totp_app_run(TotpApp* app) {
+    view_dispatcher_switch_to_view(app->view_dispatcher, TotpViewStart);
+    view_dispatcher_run(app->view_dispatcher);
+
+    return 0;
 }
 
 int32_t totp_app(void* p) {
     UNUSED(p);
-    bool saved = false;
-    Storage* storage = furi_record_open("storage");
-    FlipperFormat* file = flipper_format_file_alloc(storage);
-    string_t temp_str;
-    char key_name[50] = "";
-    string_init(temp_str);
 
-    do {
-        // Create nfc directory if necessary
-        if(!storage_simply_mkdir(storage, TOTP_APP_FOLDER)) break;
-        // Open file
-        string_printf(temp_str, "%s/%s%s", "/ext/totp", "keys", ".totp");
-        // Open file
-        if(!flipper_format_file_open_always(file, string_get_cstr(temp_str))) break;
-        // Write header
-        if(!flipper_format_write_header_cstr(file, totp_file_header, totp_file_version)) break;
-        // Write nfc device type
-        //nfc_device_prepare_format_string(dev, temp_str);
+    FURI_LOG_D("totp", "Starting totp app...");
+    FURI_LOG_D("totp", "Allocating...");
+    TotpApp* app = totp_app_alloc();
+    FURI_LOG_D("totp", "Done!");
 
-        for(int key = 0; key < keys; key++) {
-            string_printf(temp_str, "%s", base32key[key]);
-            sprintf(key_name, "%s", keyNames[key]);
+    FURI_LOG_D("totp", "Starting to run...");
+    int32_t status = totp_app_run(app);
 
-            if(!flipper_format_write_string(file, key_name, temp_str)) break;
-        }
-        //if(!flipper_format_write_hex(file, "Totp key 1", base32key[0], sizeof(base32key[0])))
-        //    break;
-        // Write UID, ATQA, SAK
-        //if(!flipper_format_write_comment_cstr(file, "UID, ATQA and SAK are common for all formats"))
-        //    break;
-        //if(!flipper_format_write_hex(file, "UID", data->uid, data->uid_len)) break;
-        //if(!flipper_format_write_hex(file, "ATQA", data->atqa, 2)) break;
-        //if(!flipper_format_write_hex(file, "SAK", &data->sak, 1)) break;
-        // Save more data if necessary
-        //if(dev->format == NfcDeviceSaveFormatMifareUl) {
-        //    if(!nfc_device_save_mifare_ul_data(file, dev)) break;
-        //} else if(dev->format == NfcDeviceSaveFormatBankCard) {
-        //    if(!nfc_device_save_bank_card_data(file, dev)) break;
-        //}
-        saved = true;
-    } while(0);
-    if(saved) {
-        flipper_format_free(file);
-        furi_record_close("storage");
-    } else {
-        flipper_format_free(file);
-        furi_record_close("storage");
-    }
+    FURI_LOG_D("totp", "Freeing...");
+    totp_app_free(app);
+    FURI_LOG_D("totp", "Done!");
 
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(TotpEvent), NULL);
-    // Configure view port
-    ViewPort* view_port = view_port_alloc();
-    view_port_input_callback_set(view_port, totp_app_input_callback, event_queue);
-    view_port_draw_callback_set(view_port, totp_app_draw_callback, NULL);
-
-    // Register view port in GUI
-    Gui* gui = furi_record_open("gui");
-    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
-    view_port_update(view_port);
-
-    osTimerId_t timer = osTimerNew(totp_app_update, osTimerPeriodic, event_queue, NULL);
-    osTimerStart(timer, osKernelGetTickFreq());
-
-    TotpEvent event;
-
-    while(1) {
-        view_port_update(view_port);
-        furi_check(osMessageQueueGet(event_queue, &event, NULL, osWaitForever) == osOK);
-
-        if((event.input.type == InputTypeShort) && (event.input.key == InputKeyBack)) {
-            break;
-        } else if((event.input.type == InputTypeShort) && (event.input.key == InputKeyRight)) {
-            if(keyId < keys - 1) {
-                keyId++;
-            } else {
-                keyId = 0;
-            }
-        } else if((event.input.type == InputTypeShort) && (event.input.key == InputKeyLeft)) {
-            if(keyId > 0) {
-                keyId--;
-            } else {
-                keyId = keys - 1;
-            }
-        }
-    }
-
-    osTimerDelete(timer);
-
-    gui_remove_view_port(gui, view_port);
-    view_port_free(view_port);
-    osMessageQueueDelete(event_queue);
-
-    furi_record_close("gui");
-    return 0;
+    FURI_LOG_D("totp", "Exiting...");
+    return status;
 }
