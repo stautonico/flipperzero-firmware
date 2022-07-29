@@ -4,22 +4,9 @@
 
 #include "totp_app.h"
 #include "totp_view.h"
+#include "totp_config.h"
 
 #include <gui/modules/variable_item_list.h>
-
-#define TOTP_KEY_COUNT 8
-
-// Add your totp keys here
-const TotpKeyEntry totp_keys[TOTP_KEY_COUNT] = {
-    {"Google", "AABBCCDDEEFFGGHH", "test@gmail.com"},
-    {"Amazon", "IIJJKKLLMMNNOOPP", "another@gmail.com"},
-    {"Apple", "1122334455667788", "this@gmail.com"},
-    {"Microsoft", "MicrosoftKeyValu", "hax0r@email.org"},
-    {"Twitter", "TwitterKeyValuee", "hacker@gov.edu"},
-    {"TOTP Test Application", "XZDQUTZBWYELXEOOVDRETZ7VDDGUPF4P", "test@gmail.com"},
-    {"Bad Key", "INVALIDBASE32", "null"},
-    {"danhersam.com", "JBSWY3DPEHPK3PXP", "@testaccount"}
-};
 
 static void totp_select_key_callback(void* context, uint32_t index) {
     FURI_LOG_D("totp", "totp_select_key_callback::Starting", index);

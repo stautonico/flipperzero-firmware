@@ -7,8 +7,10 @@
 
 typedef struct TotpKeyEntry {
     const char* name;
-    const char* secret;
+    const unsigned char* secret;
     const char* account;
+    int duration; // Time step of the TOTP algorithm (default 30)
+    int key_size; // Size of the TOTP key (default 6)
 } TotpKeyEntry;
 
 typedef struct ViewTotp {

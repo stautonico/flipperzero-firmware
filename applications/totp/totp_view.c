@@ -1,8 +1,11 @@
 #include "totp_view.h"
 
+//#include <toolbox/path.h>
+
+
 #include "totp_helpers.h"
-//#include "totp_backend.h"
-#include "totp_backend/totp_backend.h"
+#include "totp_backend.h"
+//#include "totp_backend/totp_backend.h"
 
 // Callbacks
 static void view_totp_draw_callback(Canvas* canvas, void* _model) {
@@ -13,10 +16,10 @@ static void view_totp_draw_callback(Canvas* canvas, void* _model) {
     char* text2 = malloc(sizeof(char) * 50);
     char* text3 = malloc(sizeof(char) * 50);
     char* text4 = malloc(sizeof(char) * 50);
-    TotpCalculationResult result = totp_generate_totp_NEW(model->entry.secret, 30, 6);
-//    TotpCalculationResult result = totp_generate_totp(model->entry.secret);
+    //    TotpCalculationResult result = totp_generate_totp_NEW(model->entry.secret, 30, 6);
+    TotpCalculationResult result = totp_generate_totp(model->entry.secret);
 
-    if (result.code == -1) {
+    if(result.code == NULL) {
         sprintf(text0, "!!! ERROR!!! ");
         sprintf(text1, "INVALID KEY!");
         sprintf(text2, "!!! ERROR!!! ");
@@ -26,15 +29,17 @@ static void view_totp_draw_callback(Canvas* canvas, void* _model) {
     } else {
         sprintf(text0, "Name: %s", model->entry.name);
         sprintf(text1, "Account: %s", model->entry.account);
-        sprintf(text2, "Secret: %s", model->entry.secret);
-        sprintf(text3, "Code: %ld", result.code);
-        sprintf(text4, "Expires in: %d seconds", result.expires_in);
+        sprintf(text3, "Code: %s", result.code);
+        sprintf(text4, "Expires in: %d seconds", result.expires_in+1);
 
         canvas_draw_str(canvas, 0, 12, text0);
         canvas_draw_str(canvas, 0, 24, text1);
-        canvas_draw_str(canvas, 0, 36, text2);
-        canvas_draw_str(canvas, 0, 48, text3);
-        canvas_draw_str(canvas, 0, 60, text4);
+        canvas_draw_str(canvas, 0, 36, text3);
+        canvas_draw_str(canvas, 0, 48, text4);
+
+        // Do this without getting the date/time twice
+
+        canvas_draw_box(canvas, 0, 52, (result.expires_in * 4.414), 10);
     }
     free(text0);
     free(text1);
