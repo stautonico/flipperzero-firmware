@@ -47,7 +47,6 @@ App(
         "APPS_BarcodeGenerator",
         "cli",
         "INTAPP_WiFiScanner",
-        "APPS_box_mover"
     ],
 )
 

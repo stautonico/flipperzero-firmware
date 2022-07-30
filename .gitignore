@@ -53,3 +53,7 @@ build/
 openocd.log
 
 qFlipper-x86_64.AppImage
+
+qFlipper.appimage
+
+session.log

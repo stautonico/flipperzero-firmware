@@ -77,7 +77,8 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_draw_line(canvas, 58, 30, 123, 30);
     canvas_draw_line(canvas, 58, 44, 123, 44);
 
-    const char* my_name = furi_hal_version_get_name_ptr();
+    // const char* my_name = furi_hal_version_get_name_ptr();
+    const char* my_name = "H4x0r";
     snprintf(level_str, 20, "Level: %hu", stats->level);
     canvas_draw_str(canvas, 58, 12, my_name ? my_name : "Unknown");
     canvas_draw_str(canvas, 58, 26, mood_str);
