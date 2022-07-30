@@ -34,10 +34,10 @@ static const int8_t totp_base32_vals[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0x00
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0x10
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0x20
-    14, 11, 26, 27, 28, 29, 30, 31,  1, -1, -1, -1, -1,  0, -1, -1, // 0x30
-    -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, // 0x40
+    14, 11, 26, 27, 28, 29, 30, 31, 1,  -1, -1, -1, -1, 0,  -1, -1, // 0x30
+    -1, 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, // 0x40
     15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, // 0x50
-    -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, // 0x60
+    -1, 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, // 0x60
     15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, -1, -1, -1, -1, // 0x70
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0x80
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0x90
@@ -93,9 +93,6 @@ TotpCalculationResult totp_generate_totp(const unsigned char* secret) {
 
     uint8_t hmacKey[20];
 
-
-    //    setTimezone(4);                                            // Set timezone +9 Japan
-
     base32_decode(secret, hmacKey, KEY_LENGTH);
 
     TOTP(hmacKey, KEY_LENGTH, TIME_STEP); // Secret key, Secret key length, Timestep (30s)
@@ -122,7 +119,6 @@ TotpCalculationResult totp_generate_totp(const unsigned char* secret) {
     FURI_LOG_D("totp", "totp_generate_totp::Our sprintfed code is %s", code_string);
 
     TotpCalculationResult result = {code_string, (29 - (date.tm_sec % 30))};
-    //    TotpCalculationResult result = {code_string, 0};
 
     return result;
 }

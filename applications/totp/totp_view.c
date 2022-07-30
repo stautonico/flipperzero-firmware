@@ -2,7 +2,6 @@
 
 //#include <toolbox/path.h>
 
-
 #include "totp_helpers.h"
 #include "totp_backend.h"
 //#include "totp_backend/totp_backend.h"
@@ -11,41 +10,45 @@
 static void view_totp_draw_callback(Canvas* canvas, void* _model) {
     ViewTotpModel* model = _model;
 
-    char* text0 = malloc(sizeof(char) * 50);
-    char* text1 = malloc(sizeof(char) * 50);
-    char* text2 = malloc(sizeof(char) * 50);
-    char* text3 = malloc(sizeof(char) * 50);
-    char* text4 = malloc(sizeof(char) * 50);
-    //    TotpCalculationResult result = totp_generate_totp_NEW(model->entry.secret, 30, 6);
+    // Clear out the canvas and set initial drawing state
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontBigNumbers);
+
     TotpCalculationResult result = totp_generate_totp(model->entry.secret);
 
     if(result.code == NULL) {
-        sprintf(text0, "!!! ERROR!!! ");
-        sprintf(text1, "INVALID KEY!");
-        sprintf(text2, "!!! ERROR!!! ");
-        canvas_draw_str(canvas, 0, 12, text0);
-        canvas_draw_str(canvas, 0, 24, text1);
-        canvas_draw_str(canvas, 0, 36, text2);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, "!!! ERROR !!!");
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, "INVALID SECRET KEY");
+
+        // +3 for the two quotes and the null terminator
+        char* error_message = malloc(sizeof(char) * (strlen(model->entry.name) + 2) + 1);
+        sprintf(error_message, "\"%s\"", model->entry.name);
+
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 36, AlignCenter, AlignCenter, "Check the secret key for");
+        canvas_draw_str_aligned(canvas, 64, 48, AlignCenter, AlignCenter, error_message);
+
+        free(error_message);
     } else {
-        sprintf(text0, "Name: %s", model->entry.name);
-        sprintf(text1, "Account: %s", model->entry.account);
-        sprintf(text3, "Code: %s", result.code);
-        sprintf(text4, "Expires in: %d seconds", result.expires_in+1);
+        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignCenter, result.code);
 
-        canvas_draw_str(canvas, 0, 12, text0);
-        canvas_draw_str(canvas, 0, 24, text1);
-        canvas_draw_str(canvas, 0, 36, text3);
-        canvas_draw_str(canvas, 0, 48, text4);
+        char* expiry = malloc(sizeof(char) * 50);
+        sprintf(expiry, "Expires in %d seconds", result.expires_in);
 
-        // Do this without getting the date/time twice
+        // Change back to the normal font to draw the expiration time and account name
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 4, AlignCenter, AlignCenter, model->entry.name);
+        canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignCenter, model->entry.account);
+        canvas_draw_str_aligned(canvas, 64, 44, AlignCenter, AlignCenter, expiry);
 
         canvas_draw_box(canvas, 0, 52, (result.expires_in * 4.414), 10);
+
+        free(expiry);
+        // Make sure to free the result.code string (if not NULL)
+        free(result.code);
     }
-    free(text0);
-    free(text1);
-    free(text2);
-    free(text3);
-    free(text4);
 }
 
 static bool view_totp_input_callback(InputEvent* event, void* context) {
