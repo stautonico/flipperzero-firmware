@@ -27,7 +27,8 @@ static void view_totp_draw_callback(Canvas* canvas, void* _model) {
         sprintf(error_message, "\"%s\"", model->entry.name);
 
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 36, AlignCenter, AlignCenter, "Check the secret key for");
+        canvas_draw_str_aligned(
+            canvas, 64, 36, AlignCenter, AlignCenter, "Check the secret key for");
         canvas_draw_str_aligned(canvas, 64, 48, AlignCenter, AlignCenter, error_message);
 
         free(error_message);
@@ -35,7 +36,13 @@ static void view_totp_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignCenter, result.code);
 
         char* expiry = malloc(sizeof(char) * 50);
-        sprintf(expiry, "Expires in %d seconds", result.expires_in);
+
+        // Write "second" if expiry is 1, "seconds" if expiry is > 1
+        if(result.expires_in == 1) {
+            sprintf(expiry, "Expires in %d second", result.expires_in);
+        } else {
+            sprintf(expiry, "Expires in %d seconds", result.expires_in);
+        }
 
         // Change back to the normal font to draw the expiration time and account name
         canvas_set_font(canvas, FontSecondary);

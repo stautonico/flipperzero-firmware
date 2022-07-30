@@ -101,7 +101,10 @@ TotpCalculationResult totp_generate_totp(const unsigned char* secret) {
     furi_hal_rtc_get_datetime(&datetime);
 
     struct tm date = {0};
-    date.tm_hour = datetime.hour + TOTP_TIMEZONE_OFFSET;
+    // We subtract the timezone offset instead of adding it so the user can just enter their
+    // difference between UTC and their local timezone.
+    // Example: New York is -4 hours from UTC, so the user enters -4.
+    date.tm_hour = datetime.hour - TOTP_TIMEZONE_OFFSET;
     date.tm_min = datetime.minute;
     date.tm_sec = datetime.second;
     date.tm_mday = datetime.day;
@@ -118,7 +121,7 @@ TotpCalculationResult totp_generate_totp(const unsigned char* secret) {
 
     FURI_LOG_D("totp", "totp_generate_totp::Our sprintfed code is %s", code_string);
 
-    TotpCalculationResult result = {code_string, (29 - (date.tm_sec % 30))};
+    TotpCalculationResult result = {code_string, (29 - (date.tm_sec % 30)) + 1};
 
     return result;
 }
