@@ -299,8 +299,9 @@ static Loader* loader_alloc() {
     instance->pubsub = furi_pubsub_alloc();
 
 #ifdef SRV_CLI
-    instance->cli = furi_record_open("cli");
-    cli_add_command(instance->cli, "loader", CliCommandFlagParallelSafe, loader_cli, instance);
+    instance->cli = furi_record_open(RECORD_CLI);
+    cli_add_command(
+        instance->cli, RECORD_LOADER, CliCommandFlagParallelSafe, loader_cli, instance);
 #else
     UNUSED(loader_cli);
 #endif
@@ -308,7 +309,7 @@ static Loader* loader_alloc() {
     instance->loader_thread = furi_thread_get_current_id();
 
     // Gui
-    instance->gui = furi_record_open("gui");
+    instance->gui = furi_record_open(RECORD_GUI);
     instance->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_attach_to_gui(
         instance->view_dispatcher, instance->gui, ViewDispatcherTypeFullscreen);
@@ -320,8 +321,7 @@ static Loader* loader_alloc() {
     // Games menu
     instance->games_menu = submenu_alloc();
     view_set_context(submenu_get_view(instance->games_menu), instance->games_menu);
-    view_set_previous_callback(
-        submenu_get_view(instance->games_menu), loader_hide_menu);
+    view_set_previous_callback(submenu_get_view(instance->games_menu), loader_hide_menu);
     view_dispatcher_add_view(
         instance->view_dispatcher, LoaderMenuViewGames, submenu_get_view(instance->games_menu));
     // Plugins menu
@@ -359,7 +359,7 @@ static void loader_free(Loader* instance) {
     furi_assert(instance);
 
     if(instance->cli) {
-        furi_record_close("cli");
+        furi_record_close(RECORD_CLI);
     }
 
     furi_pubsub_free(instance->pubsub);
@@ -378,7 +378,7 @@ static void loader_free(Loader* instance) {
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewSettings);
     view_dispatcher_free(loader_instance->view_dispatcher);
 
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
 
     free(instance);
     instance = NULL;
@@ -396,15 +396,6 @@ static void loader_build_menu() {
             loader_menu_callback,
             (void*)&FLIPPER_APPS[i]);
     }
-    if(FLIPPER_GAMES_COUNT != 0) {
-        menu_add_item(
-            loader_instance->primary_menu,
-            "Games",
-            &A_Games_14,
-            i++,
-            loader_submenu_callback,
-            (void*)LoaderMenuViewGames);
-    }
     if(FLIPPER_PLUGINS_COUNT != 0) {
         menu_add_item(
             loader_instance->primary_menu,
@@ -413,6 +404,15 @@ static void loader_build_menu() {
             i++,
             loader_submenu_callback,
             (void*)LoaderMenuViewPlugins);
+    }
+    if(FLIPPER_GAMES_COUNT != 0) {
+        menu_add_item(
+            loader_instance->primary_menu,
+            "Games",
+            &A_Games_14,
+            i++,
+            loader_submenu_callback,
+            (void*)LoaderMenuViewGames);
     }
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         menu_add_item(
@@ -507,7 +507,7 @@ int32_t loader_srv(void* p) {
 
     FURI_LOG_I(TAG, "Started");
 
-    furi_record_create("loader", loader_instance);
+    furi_record_create(RECORD_LOADER, loader_instance);
 
 #ifdef LOADER_AUTOSTART
     loader_start(loader_instance, LOADER_AUTOSTART, NULL);
@@ -515,7 +515,7 @@ int32_t loader_srv(void* p) {
 
     while(1) {
         uint32_t flags =
-            furi_thread_flags_wait(LOADER_THREAD_FLAG_ALL, osFlagsWaitAny, osWaitForever);
+            furi_thread_flags_wait(LOADER_THREAD_FLAG_ALL, FuriFlagWaitAny, FuriWaitForever);
         if(flags & LOADER_THREAD_FLAG_SHOW_MENU) {
             menu_set_selected_item(loader_instance->primary_menu, 0);
             view_dispatcher_switch_to_view(
@@ -524,7 +524,7 @@ int32_t loader_srv(void* p) {
         }
     }
 
-    furi_record_destroy("loader");
+    furi_record_destroy(RECORD_LOADER);
     loader_free(loader_instance);
 
     return 0;

@@ -32,7 +32,7 @@ static char* subString(char* someString, int n) {
     char* new = malloc(sizeof(char) * n + 1);
     strncpy(new, someString, n);
     new[n] = '\0';
-    return(new);
+    return (new);
 }
 
 static char* file_stub(const char* file_name) {
@@ -41,7 +41,7 @@ static char* file_stub(const char* file_name) {
     // string_init(file_name);
     path_extract_filename_no_ext(file_name, filename);
 
-    return(subString((char*)string_get_cstr(filename), 8));
+    return (subString((char*)string_get_cstr(filename), 8));
 }
 
 static void jukebox_send_signal(uint32_t frequency, string_t signal, string_t protocol) {
@@ -85,7 +85,7 @@ static void jukebox_send_signal(uint32_t frequency, string_t signal, string_t pr
     while(!(furi_hal_subghz_is_async_tx_complete())) {
         FURI_LOG_D(TAG, ".");
         fflush(stdout);
-        osDelay(333);
+        furi_delay_ms(333);
     }
     notification_message(notification, &sequence_reset_vibro);
 
@@ -170,15 +170,15 @@ static void jukebox_render_callback(Canvas* canvas, void* ctx) {
 }
 
 static void jukebox_input_callback(InputEvent* input_event, void* ctx) {
-	if (input_event->type == InputTypeRelease) {
-		osMessageQueueId_t event_queue = ctx;
-		osMessageQueuePut(event_queue, input_event, 0, osWaitForever);
-	}
+    if(input_event->type == InputTypeRelease) {
+        FuriMessageQueue* event_queue = ctx;
+        furi_message_queue_put(event_queue, input_event, FuriWaitForever);
+    }
 }
 
 int32_t jukebox_app(void* p) {
     UNUSED(p);
-    osMessageQueueId_t event_queue = osMessageQueueNew(32, sizeof(InputEvent), NULL);
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(32, sizeof(InputEvent));
     furi_check(event_queue);
     string_init(up_file);
     string_init(down_file);
@@ -226,7 +226,7 @@ int32_t jukebox_app(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(RemoteAppState))) {
         FURI_LOG_D(TAG, "cannot create mutex");
-        return(0);
+        return (0);
     }
 
     ViewPort* view_port = view_port_alloc();
@@ -239,7 +239,7 @@ int32_t jukebox_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     InputEvent event;
-    while(osMessageQueueGet(event_queue, &event, NULL, osWaitForever) == osOK) {
+    while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         RemoteAppState* state = (RemoteAppState*)acquire_mutex_block(&state_mutex);
         FURI_LOG_D(
             TAG,
@@ -248,18 +248,18 @@ int32_t jukebox_app(void* p) {
             input_get_type_name(event.type));
 
         if(event.key == InputKeyRight) {
-                state->press[0] = true;
+            state->press[0] = true;
         } else if(event.key == InputKeyLeft) {
-                state->press[1] = true;
+            state->press[1] = true;
         } else if(event.key == InputKeyUp) {
-                state->press[2] = true;
+            state->press[2] = true;
         } else if(event.key == InputKeyDown) {
-                state->press[3] = true;
+            state->press[3] = true;
         } else if(event.key == InputKeyOk) {
-                state->press[4] = true;
+            state->press[4] = true;
         } else if(event.key == InputKeyBack) {
-                release_mutex(&state_mutex, state);
-                break;
+            release_mutex(&state_mutex, state);
+            break;
         }
         release_mutex(&state_mutex, state);
         view_port_update(view_port);
@@ -267,10 +267,10 @@ int32_t jukebox_app(void* p) {
     // remove & free all stuff created by app
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
-    osMessageQueueDelete(event_queue);
+    furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
 
     furi_record_close("gui");
 
-    return(0);
+    return (0);
 }

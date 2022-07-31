@@ -1,11 +1,9 @@
 #pragma once
 
-#include <furi/pubsub.h>
+#include <core/pubsub.h>
 #include <stdbool.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define RECORD_LOADER "loader"
 
 typedef struct Loader Loader;
 
@@ -54,7 +52,3 @@ void loader_update_menu();
 
 /** Show primary loader */
 FuriPubSub* loader_get_pubsub(Loader* instance);
-
-#ifdef __cplusplus
-}
-#endif

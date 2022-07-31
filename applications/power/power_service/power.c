@@ -15,32 +15,40 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 0, 0, &I_Battery_26x8);
 
     if(power->info.gauge_is_ok) {
-
         char batteryPercentile[5];
-        sprintf(batteryPercentile, "%d", power->info.charge); 
+        sprintf(batteryPercentile, "%d", power->info.charge);
         strcat(batteryPercentile, "%");
 
-        if((power->displayBatteryPercentage == 1) && (power->state != PowerStateCharging)) { //if display battery percentage, black background white text
+        if((power->displayBatteryPercentage == 1) &&
+           (power->state !=
+            PowerStateCharging)) { //if display battery percentage, black background white text
             canvas_set_font(canvas, FontBatteryPercent);
             canvas_set_color(canvas, ColorBlack);
-            canvas_draw_box(canvas, 1, 1, 22, 6); 
+            canvas_draw_box(canvas, 1, 1, 22, 6);
             canvas_set_color(canvas, ColorWhite);
             canvas_draw_str_aligned(canvas, 12, 4, AlignCenter, AlignCenter, batteryPercentile);
-        } else if((power->displayBatteryPercentage == 2) && (power->state != PowerStateCharging)) { //if display inverted percentage, white background black text
+        } else if(
+            (power->displayBatteryPercentage == 2) &&
+            (power->state !=
+             PowerStateCharging)) { //if display inverted percentage, white background black text
             canvas_set_font(canvas, FontBatteryPercent);
             canvas_set_color(canvas, ColorBlack);
             canvas_draw_str_aligned(canvas, 12, 4, AlignCenter, AlignCenter, batteryPercentile);
-        } else if((power->displayBatteryPercentage == 3) && (power->state != PowerStateCharging)) { //Retro style segmented display, 3 parts
+        } else if(
+            (power->displayBatteryPercentage == 3) &&
+            (power->state != PowerStateCharging)) { //Retro style segmented display, 3 parts
             if(power->info.charge > 25) {
                 canvas_draw_box(canvas, 2, 2, 6, 4);
             }
             if(power->info.charge > 50) {
-                canvas_draw_box(canvas, 9, 2, 6, 4); 
+                canvas_draw_box(canvas, 9, 2, 6, 4);
             }
             if(power->info.charge > 75) {
-                canvas_draw_box(canvas, 16, 2, 6, 4); 
+                canvas_draw_box(canvas, 16, 2, 6, 4);
             }
-        } else if((power->displayBatteryPercentage == 4) && (power->state != PowerStateCharging)) { //Retro style segmented display, 5 parts
+        } else if(
+            (power->displayBatteryPercentage == 4) &&
+            (power->state != PowerStateCharging)) { //Retro style segmented display, 5 parts
             if(power->info.charge > 10) {
                 canvas_draw_box(canvas, 2, 2, 3, 4);
             }
@@ -85,8 +93,8 @@ Power* power_alloc() {
     Power* power = malloc(sizeof(Power));
 
     // Records
-    power->notification = furi_record_open("notification");
-    power->gui = furi_record_open("gui");
+    power->notification = furi_record_open(RECORD_NOTIFICATION);
+    power->gui = furi_record_open(RECORD_GUI);
 
     // Pubsub
     power->event_pubsub = furi_pubsub_alloc();
@@ -95,7 +103,7 @@ Power* power_alloc() {
     power->state = PowerStateNotCharging;
     power->battery_low = false;
     power->power_off_timeout = POWER_OFF_TIMEOUT;
-    power->api_mtx = osMutexNew(NULL);
+    power->api_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
 
     // Gui
     power->view_dispatcher = view_dispatcher_alloc();
@@ -127,14 +135,14 @@ void power_free(Power* power) {
     view_port_free(power->battery_view_port);
 
     // State
-    osMutexDelete(power->api_mtx);
+    furi_mutex_free(power->api_mtx);
 
     // FuriPubSub
     furi_pubsub_free(power->event_pubsub);
 
     // Records
-    furi_record_close("notification");
-    furi_record_close("gui");
+    furi_record_close(RECORD_NOTIFICATION);
+    furi_record_close(RECORD_GUI);
 
     free(power);
 }
@@ -172,7 +180,7 @@ static bool power_update_info(Power* power) {
     LOAD_DESKTOP_SETTINGS(settings);
     power->displayBatteryPercentage = settings->displayBatteryPercentage;
     free(settings);
-	
+
     info.gauge_is_ok = furi_hal_power_gauge_is_ok();
     info.charge = furi_hal_power_get_pct();
     info.health = furi_hal_power_get_bat_health_pct();
@@ -186,10 +194,10 @@ static bool power_update_info(Power* power) {
     info.temperature_charger = furi_hal_power_get_battery_temperature(FuriHalPowerICCharger);
     info.temperature_gauge = furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);
 
-    osMutexAcquire(power->api_mtx, osWaitForever);
+    furi_mutex_acquire(power->api_mtx, FuriWaitForever);
     bool need_refresh = power->info.charge != info.charge;
     power->info = info;
-    osMutexRelease(power->api_mtx);
+    furi_mutex_release(power->api_mtx);
 
     return need_refresh;
 }
@@ -251,7 +259,7 @@ int32_t power_srv(void* p) {
     (void)p;
     Power* power = power_alloc();
     power_update_info(power);
-    furi_record_create("power", power);
+    furi_record_create(RECORD_POWER, power);
 
     while(1) {
         // Update data from gauge and charger
@@ -274,7 +282,7 @@ int32_t power_srv(void* p) {
             furi_hal_power_check_otg_status();
         }
 
-        osDelay(1000);
+        furi_delay_ms(1000);
     }
 
     power_free(power);

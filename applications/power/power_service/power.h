@@ -1,12 +1,10 @@
 #pragma once
 
 #include <stdint.h>
-#include <furi/pubsub.h>
+#include <core/pubsub.h>
 #include <stdbool.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define RECORD_POWER "power"
 
 typedef struct Power Power;
 
@@ -89,7 +87,3 @@ bool power_is_battery_healthy(Power* power);
  * @param enable    true - enable, false - disable
  */
 void power_enable_low_battery_level_notification(Power* power, bool enable);
-
-#ifdef __cplusplus
-}
-#endif

@@ -23,7 +23,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
     const Version* ver;
     char buffer[64];
 
-    static const char* headers[] = {"FW Version info:", "Dolphin info:"};
+    static const char* headers[] = {"FW Version Info:", "Dolphin Info:"};
 
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
@@ -73,15 +73,14 @@ void desktop_debug_render(Canvas* canvas, void* model) {
             c2_ver ? c2_ver->StackTypeString : "<none>");
         canvas_draw_str(canvas, 5, 39 + STATUS_BAR_Y_SHIFT, buffer);
 
-        snprintf(
-            buffer, sizeof(buffer), "[%d] %s", version_get_target(ver), "dev");
+        snprintf(buffer, sizeof(buffer), "[%d] %s", version_get_target(ver), "dev");
         canvas_draw_str(canvas, 5, 50 + STATUS_BAR_Y_SHIFT, buffer);
 
     } else {
         char buffer[64];
-        Dolphin* dolphin = furi_record_open("dolphin");
+        Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
         DolphinStats stats = dolphin_stats(dolphin);
-        furi_record_close("dolphin");
+        furi_record_close(RECORD_DOLPHIN);
 
         uint32_t current_lvl = stats.level;
         uint32_t remaining = dolphin_state_xp_to_levelup(m->icounter);
@@ -175,7 +174,7 @@ void desktop_debug_free(DesktopDebugView* debug_view) {
 }
 
 void desktop_debug_get_dolphin_data(DesktopDebugView* debug_view) {
-    Dolphin* dolphin = furi_record_open("dolphin");
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     DolphinStats stats = dolphin_stats(dolphin);
     with_view_model(
         debug_view->view, (DesktopDebugViewModel * model) {
@@ -185,7 +184,7 @@ void desktop_debug_get_dolphin_data(DesktopDebugView* debug_view) {
             return true;
         });
 
-    furi_record_close("dolphin");
+    furi_record_close(RECORD_DOLPHIN);
 }
 
 void desktop_debug_reset_screen_idx(DesktopDebugView* debug_view) {

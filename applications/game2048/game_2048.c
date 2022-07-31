@@ -106,12 +106,11 @@ static void game_2048_render_callback(Canvas* const canvas, ValueMutex* const vm
     release_mutex(vm, game_state);
 }
 
-static void game_2048_input_callback(
-    const InputEvent* const input_event,
-    const osMessageQueueId_t event_queue) {
+static void
+    game_2048_input_callback(const InputEvent* const input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
-    osMessageQueuePut(event_queue, input_event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
 // if return false then Game Over
@@ -323,10 +322,24 @@ static void game_2048_process_move(GameState* const game_state) {
     // </debug>
 }
 
+static void game_2048_restart(GameState* const game_state) {
+    // clear all cells
+    for(uint8_t y = 0; y < 4; y++) {
+        for(uint8_t x = 0; x < 4; x++) {
+            game_state->field[y][x] = 0;
+        }
+    }
+
+    // start next game
+    game_2048_set_new_number(game_state);
+    game_2048_set_new_number(game_state);
+}
+
 int32_t game_2048_app(void* p) {
+    UNUSED(p);
     int32_t return_code = 0;
 
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(InputEvent), NULL);
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     GameState* game_state = malloc(sizeof(GameState));
 
@@ -373,11 +386,11 @@ int32_t game_2048_app(void* p) {
 
     InputEvent event;
     for(bool loop = true; loop;) {
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         GameState* game_state = (GameState*)acquire_mutex_block(&state_mutex);
 
-        if(event_status == osOK) {
-            if(event.type == InputTypePress) {
+        if(event_status == FuriStatusOk) {
+            if(event.type == InputTypeShort) {
                 switch(event.key) {
                 case InputKeyUp:
                     game_state->direction = DirectionUp;
@@ -399,11 +412,17 @@ int32_t game_2048_app(void* p) {
                     game_2048_process_move(game_state);
                     game_2048_set_new_number(game_state);
                     break;
-                case InputKeyOk:; // TODO: reinit in game ower state
+                case InputKeyOk:
+                    game_state->direction = DirectionIdle;
                     break;
                 case InputKeyBack:
                     loop = false;
                     break;
+                }
+            } else if(event.type == InputTypeLong) {
+                if(event.key == InputKeyOk) {
+                    game_state->direction = DirectionIdle;
+                    game_2048_restart(game_state);
                 }
             }
         }
@@ -420,7 +439,7 @@ int32_t game_2048_app(void* p) {
 
 free_and_exit:
     free(game_state);
-    osMessageQueueDelete(event_queue);
+    furi_message_queue_free(event_queue);
 
     return return_code;
 }

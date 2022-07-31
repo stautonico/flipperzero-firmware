@@ -1,7 +1,6 @@
 #include "storage_move_to_sd.h"
-#include "cmsis_os2.h"
-#include "furi/common_defines.h"
-#include "furi/log.h"
+#include <core/common_defines.h>
+#include <core/log.h>
 #include "loader/loader.h"
 #include "m-string.h"
 #include <stdint.h>
@@ -18,11 +17,11 @@ static const char* app_dirs[] = {
     "infrared",
     "ibutton",
     "badusb",
-    "bt.settings",
-    "desktop.settings",
-    "dolphin.state",
-    "notification.settings",
-    "bt.keys",
+    ".bt.settings",
+    ".desktop.settings",
+    ".dolphin.state",
+    ".notification.settings",
+    ".bt.keys",
 };
 
 bool storage_move_to_sd_perform(void) {
@@ -41,7 +40,7 @@ bool storage_move_to_sd_perform(void) {
         if(i > 5) {
             string_printf(path_src, "%s/%s", MOVE_SRC, app_dirs[i]);
             string_printf(path_dst, "%s/dolphin_restorer/%s", MOVE_DST, app_dirs[i]);
-		    storage_simply_remove_recursive(storage, string_get_cstr(path_dst));
+            storage_simply_remove_recursive(storage, string_get_cstr(path_dst));
             storage_common_copy(storage, string_get_cstr(path_src), string_get_cstr(path_dst));
         } else {
             string_printf(path_src, "%s/%s", MOVE_SRC, app_dirs[i]);
@@ -50,7 +49,7 @@ bool storage_move_to_sd_perform(void) {
             storage_simply_remove_recursive(storage, string_get_cstr(path_src));
         }
     }
-	
+
     string_clear(path_src);
     string_clear(path_dst);
 

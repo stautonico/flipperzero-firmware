@@ -264,10 +264,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                              plugin_state->barcodeNumeral[8] + plugin_state->barcodeNumeral[10];
             //add all odd positions Confusing because 0index
             checkDigit = checkDigit * 3; //times 3
-            checkDigit +=
-                plugin_state->barcodeNumeral[1] + plugin_state->barcodeNumeral[3] +
-                plugin_state->barcodeNumeral[5] + plugin_state->barcodeNumeral[7] +
-                plugin_state->barcodeNumeral[9]; 
+            checkDigit += plugin_state->barcodeNumeral[1] + plugin_state->barcodeNumeral[3] +
+                          plugin_state->barcodeNumeral[5] + plugin_state->barcodeNumeral[7] +
+                          plugin_state->barcodeNumeral[9];
             //add all even positions to above. Confusing because 0index
             checkDigit = checkDigit % 10; //mod 10
             //if m - 0 then x12 = 0, otherwise x12 is 10 - m
@@ -319,10 +318,14 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_box(canvas, BARCODE_STARTING_POS + 48, BARCODE_Y_START, 1, BARCODE_HEIGHT + 2);
     //canvas_draw_box(canvas, BARCODE_STARTING_POS + 49, BARCODE_Y_START, 1, BARCODE_HEIGHT);
 
-
     if(plugin_state->editingMode) {
         canvas_set_color(canvas, ColorBlack);
-        canvas_draw_box(canvas,editingMarkerPosition[plugin_state->editingIndex],63,7,1); //draw editing cursor
+        canvas_draw_box(
+            canvas,
+            editingMarkerPosition[plugin_state->editingIndex],
+            63,
+            7,
+            1); //draw editing cursor
     }
 
     canvas_set_color(canvas, ColorBlack);
@@ -335,16 +338,14 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         1,
         BARCODE_HEIGHT + 2); //end safety
 
-
     release_mutex((ValueMutex*)ctx, plugin_state);
 }
 
-
-static void input_callback(InputEvent* input_event, osMessageQueueId_t event_queue) {
+static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
-    osMessageQueuePut(event_queue, &event, 0, osWaitForever);
+    furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
 static void barcode_generator_state_init(PluginState* const plugin_state) {
@@ -363,7 +364,7 @@ static void barcode_generator_state_init(PluginState* const plugin_state) {
 int32_t barcode_generator_app(void* p) {
     UNUSED(p);
     //testing
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(PluginEvent), NULL);
+    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
     barcode_generator_state_init(plugin_state);
@@ -385,10 +386,10 @@ int32_t barcode_generator_app(void* p) {
 
     PluginEvent event;
     for(bool processing = true; processing;) {
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
 
-        if(event_status == osOK) {
+        if(event_status == FuriStatusOk) {
             // press events
             if(event.type == EventTypeKey) {
                 if((event.input.type == InputTypePress) || (event.input.type == InputTypeRepeat)) {
@@ -451,7 +452,7 @@ int32_t barcode_generator_app(void* p) {
     gui_remove_view_port(gui, view_port);
     furi_record_close("gui");
     view_port_free(view_port);
-    osMessageQueueDelete(event_queue);
+    furi_message_queue_free(event_queue);
 
     return 0;
 }

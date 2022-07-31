@@ -1,5 +1,7 @@
 #include "dolphin_state.h"
 #include "dolphin/helpers/dolphin_deed.h"
+#include "dolphin_state_filename.h"
+
 #include <stdint.h>
 #include <storage/storage.h>
 #include <furi.h>
@@ -8,7 +10,8 @@
 #include <toolbox/saved_struct.h>
 
 #define TAG "DolphinState"
-#define DOLPHIN_STATE_PATH "/int/dolphin.state"
+
+#define DOLPHIN_STATE_PATH INT_PATH(DOLPHIN_STATE_FILE_NAME)
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
 #define LEVEL2_THRESHOLD 735
@@ -161,7 +164,7 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     int32_t new_butthurt = ((int32_t)dolphin_state->data.butthurt) -
                            (butthurt_icounter_level_old != butthurt_icounter_level_new);
     new_butthurt = CLAMP(new_butthurt, BUTTHURT_MAX, BUTTHURT_MIN);
-
+    new_butthurt = BUTTHURT_MIN; // FLIPPER STAYS HAPPY
     dolphin_state->data.butthurt = new_butthurt;
     dolphin_state->data.timestamp = dolphin_state_timestamp();
     dolphin_state->dirty = true;

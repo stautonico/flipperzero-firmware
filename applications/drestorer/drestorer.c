@@ -1,7 +1,6 @@
 #include "drestorer.h"
-#include "cmsis_os2.h"
-#include "furi/common_defines.h"
-#include "furi/log.h"
+#include <core/common_defines.h>
+#include <core/log.h>
 #include "loader/loader.h"
 #include "m-string.h"
 #include <stdint.h>
@@ -12,11 +11,11 @@
 #define MOVE_DST "/int"
 
 static const char* app_dirs[] = {
-    "bt.settings",
-    "desktop.settings",
-    "dolphin.state",
-    "notification.settings",
-    "bt.keys",
+    ".bt.settings",
+    ".desktop.settings",
+    ".dolphin.state",
+    ".notification.settings",
+    ".bt.keys",
 };
 
 bool drestorer_perform(void) {

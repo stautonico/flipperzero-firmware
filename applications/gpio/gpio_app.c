@@ -24,7 +24,7 @@ static void gpio_app_tick_event_callback(void* context) {
 GpioApp* gpio_app_alloc() {
     GpioApp* app = malloc(sizeof(GpioApp));
 
-    app->gui = furi_record_open("gui");
+    app->gui = furi_record_open(RECORD_GUI);
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&gpio_scene_handlers, app);
@@ -40,7 +40,7 @@ GpioApp* gpio_app_alloc() {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    app->notifications = furi_record_open("notification");
+    app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     app->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
@@ -50,6 +50,12 @@ GpioApp* gpio_app_alloc() {
     app->gpio_test = gpio_test_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, GpioAppViewGpioTest, gpio_test_get_view(app->gpio_test));
+
+    app->gpio_i2c_scanner = gpio_i2c_scanner_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        GpioAppViewI2CScanner,
+        gpio_i2c_scanner_get_view(app->gpio_i2c_scanner));
 
     app->widget = widget_alloc();
     view_dispatcher_add_view(
@@ -75,6 +81,7 @@ void gpio_app_free(GpioApp* app) {
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, GpioAppViewVarItemList);
     view_dispatcher_remove_view(app->view_dispatcher, GpioAppViewGpioTest);
+    view_dispatcher_remove_view(app->view_dispatcher, GpioAppViewI2CScanner);
     view_dispatcher_remove_view(app->view_dispatcher, GpioAppViewUsbUart);
     view_dispatcher_remove_view(app->view_dispatcher, GpioAppViewUsbUartCfg);
     view_dispatcher_remove_view(app->view_dispatcher, GpioAppViewUsbUartCloseRpc);
@@ -82,14 +89,15 @@ void gpio_app_free(GpioApp* app) {
     widget_free(app->widget);
     gpio_test_free(app->gpio_test);
     gpio_usb_uart_free(app->gpio_usb_uart);
+    gpio_i2c_scanner_free(app->gpio_i2c_scanner);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
 
     // Close records
-    furi_record_close("gui");
-    furi_record_close("notification");
+    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
 
     free(app);
 }

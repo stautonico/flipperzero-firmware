@@ -7,9 +7,7 @@
 
 #include <furi_hal_resources.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define RECORD_INPUT_EVENTS "input_events"
 
 /** Input Types
  * Some of them are physical events and some logical
@@ -40,7 +38,3 @@ const char* input_get_key_name(InputKey key);
  * @return string
  */
 const char* input_get_type_name(InputType type);
-
-#ifdef __cplusplus
-}
-#endif

@@ -78,10 +78,12 @@ libs = env.BuildModules(
         "infrared",
         "littlefs",
         "subghz",
+        "nfc",
         "appframe",
         "misc",
         "mbedtls",
         "loclass",
+        "flipper_application",
     ],
 )
 

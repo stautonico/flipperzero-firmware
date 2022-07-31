@@ -152,7 +152,7 @@ void cli_command_log(Cli* cli, string_t args, void* context) {
     furi_hal_console_set_tx_callback(cli_command_log_tx_callback, ring);
 
     printf("Press CTRL+C to stop...\r\n");
-    while(!cli_cmd_interrupt_received(cli)) {
+    while(!cli_cmd_interrupt_received(cli) && cli_is_connected(cli)) {
         size_t ret = xStreamBufferReceive(ring, buffer, CLI_COMMAND_LOG_BUFFER_SIZE, 50);
         cli_write(cli, buffer, ret);
     }
@@ -166,13 +166,13 @@ void cli_command_vibro(Cli* cli, string_t args, void* context) {
     UNUSED(cli);
     UNUSED(context);
     if(!string_cmp(args, "0")) {
-        NotificationApp* notification = furi_record_open("notification");
+        NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
         notification_message_block(notification, &sequence_reset_vibro);
-        furi_record_close("notification");
+        furi_record_close(RECORD_NOTIFICATION);
     } else if(!string_cmp(args, "1")) {
-        NotificationApp* notification = furi_record_open("notification");
+        NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
         notification_message_block(notification, &sequence_set_vibro_on);
-        furi_record_close("notification");
+        furi_record_close(RECORD_NOTIFICATION);
     } else {
         cli_print_usage("vibro", "<1|0>", string_get_cstr(args));
     }
@@ -244,9 +244,9 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     };
 
     // Send notification
-    NotificationApp* notification = furi_record_open("notification");
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     notification_internal_message_block(notification, &notification_sequence);
-    furi_record_close("notification");
+    furi_record_close(RECORD_NOTIFICATION);
 }
 
 void cli_command_ps(Cli* cli, string_t args, void* context) {

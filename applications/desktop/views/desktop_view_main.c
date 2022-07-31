@@ -22,7 +22,7 @@ struct DesktopMainView {
 
 static void desktop_view_main_dumbmode_changed(bool isThisGameMode) {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
-    LOAD_DESKTOP_SETTINGS(&app->settings); 
+    LOAD_DESKTOP_SETTINGS(&app->settings);
     app->settings.is_dumbmode = isThisGameMode;
     SAVE_DESKTOP_SETTINGS(&app->settings);
 }
@@ -170,6 +170,6 @@ DesktopMainView* desktop_main_alloc() {
 void desktop_main_free(DesktopMainView* main_view) {
     furi_assert(main_view);
     view_free(main_view->view);
-    osTimerDelete(main_view->poweroff_timer);
+    furi_timer_free(main_view->poweroff_timer);
     free(main_view);
 }
