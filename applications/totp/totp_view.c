@@ -50,7 +50,7 @@ static void view_totp_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignCenter, model->entry.account);
         canvas_draw_str_aligned(canvas, 64, 44, AlignCenter, AlignCenter, expiry);
 
-        canvas_draw_box(canvas, 0, 52, (result.expires_in * 4.414), 10);
+        canvas_draw_box(canvas, 0, 52, ((result.expires_in - 1) * 4.414), 10);
 
         free(expiry);
         // Make sure to free the result.code string (if not NULL)
