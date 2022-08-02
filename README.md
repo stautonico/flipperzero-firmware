@@ -1,28 +1,19 @@
 <h2>
 
 [Flipper Zero Firmware](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/ReadMe.md) <= READ THIS READ ME</h2>
+#### Thank you to all the supporters; this firmware is a fork of [Unleashed/Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & [the main Flipper Devices FW](https://github.com/flipperdevices/flipperzero-firmware)! I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from active community projects. All features and projects pulled are listed in expandable sections below. Please do [support us](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/SUPPORT.md), [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware) & [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)! Everyone gives much of their free time to ensure the success of the Flipper Zero!
 
-#   - UPDATE USING SD CARD METHOD FOR NEW [`subghz/assets/setting_user`](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/setting_user) and [`subghz/assets/extend_range.txt`](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/unleashed/assets/resources/subghz/assets/extend_range.txt) FILE.<br>&nbsp;&nbsp;&nbsp;&nbsp;You can now unleash your flipper via iOS app.
+#   UPDATE USING SD CARD METHOD FOR NEW DOLPHIN ANIMATION MANIFEST & LEVELS OR FACE *INFINITE REBOOT* NEEDING DFU RESET.
 
 <b>Latest Updates:</b>
 
 - TOFIX - SubGHz: Auto Detect Raw in READ action from [perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/79)
 - TOFIX - FAP Loader disabled so the FW compiles. Compiling requires api_symbols.csv manipulation and some FAPs are not working, we are aware.
-- Dolphin Mood: Stays Happy [Thanks to biocage](https://github.com/biocage/flipperzero-firmware)
-- 2048 now has hold center for restart [Thanks to DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/133)
-- Added [Add skylanders (/activision) mifare classic to identification procedure #1497 (By equipter)](https://github.com/flipperdevices/flipperzero-firmware/pull/1497)
-- Added NFC keys for Skylanders
-- Added [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `HIDDEN "INTAPP_esp8266_deauth"` due to `Req: ESP8266`
-- UPDATED Plugins & Games list to show what has been `HIDDEN`
-- DUCKY_LANG has been extended with HU parameter [Thanks to terzinnorbert](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/135)
-- Added [New frequency analyzer #1501 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
-- Added [Add a Mifare Classic info screen to parser output #1504 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/1504)
-- Added [BadUSB: add SYSRQ keys #1460 (By rck)](https://github.com/flipperdevices/flipperzero-firmware/pull/1460) with small refactor by RogueMaster
-- Added [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431) with small refactor by RogueMaster
-- Added [nfc: make dict attack more interactive #1462 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1462)
-- Added [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
-- Added [FIX: Fixed inconsistencies between texts #1496 (By zigad)](https://github.com/flipperdevices/flipperzero-firmware/pull/1496)
-- Latest OFW Changes: [#1502](https://github.com/flipperdevices/flipperzero-firmware/pull/1502), [#1467](https://github.com/flipperdevices/flipperzero-firmware/pull/1467) & [#1402](https://github.com/flipperdevices/flipperzero-firmware/pull/1402)
+- Added some formatting updates and updates from the checkedout PRs
+- Added some game score updates pushed in unleashed
+- Update to touchtunes_brute_map.txt
+- Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
+- Updates for [UniRF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix/blob/minimal-fbt/applications/unirfremix/unirfremix_app.c)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -90,7 +81,8 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - Assets: Running DolphinRestorer.fap on new install will auto-level to the end of Level 2.
 - BadUSB: DUCKY_LANG keyword support [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
-- Dolphin Mood: Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware)
+- Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
+- Dolphin: Mood Stays Happy [(Thanks to biocage)](https://github.com/biocage/flipperzero-firmware)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - NFC: Display UL PWD_AUTH payload / ntag-pwd-capture [(Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - Plugins: Fixed sound decay issues on music player [Thanks to qqMajiKpp]
@@ -114,7 +106,9 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
  </details>
 
 
-## Open PRs Checkedout & Not Merged In Main:
+<details>
+  <summary><B>Open PRs Checkedout & Not Merged In Main:</b></summary><br/>
+  
 - [`ELF Loader`/[FL-2627] Plugins API #1387 (By hedger/DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1387)
 - [NFC: Display UL PWD_AUTH payload / ntag-pwd-capture (Thanks to GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1471)
 - [Add skylanders (/activision) mifare classic to identification procedure #1497 (By equipter)](https://github.com/flipperdevices/flipperzero-firmware/pull/1497)
@@ -125,6 +119,8 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [nfc: make dict attack more interactive #1462 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1462)
 - [nfc: collect nonces during mf classic emulation #1484 (By indutny)](https://github.com/flipperdevices/flipperzero-firmware/pull/1484)
 - [FIX: Fixed inconsistencies between texts #1496 (By zigad)](https://github.com/flipperdevices/flipperzero-firmware/pull/1496)
+
+</details>
 
 </td><td>
 
@@ -177,5 +173,3 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - [Fixed building for users with space in windows username #1437 (By SzymonLisowiec)](https://github.com/flipperdevices/flipperzero-firmware/pull/1437)
 
 </td></tr></table>
-
-### Thank you, [MuddleBox](https://github.com/MuddledBox/flipperzero-firmware), [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware), [WeTox-Team](https://github.com/wetox-team/flipperzero-firmware) & of course, most of all [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware)!
