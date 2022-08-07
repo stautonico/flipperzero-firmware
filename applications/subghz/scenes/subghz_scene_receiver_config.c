@@ -25,9 +25,31 @@ const char* const detect_raw_text[DETECT_RAW_COUNT] = {
     "OFF",
     "ON",
 };
+
 const SubGhzProtocolFlag detect_raw_value[DETECT_RAW_COUNT] = {
     SubGhzProtocolFlag_Decodable,
     SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_RAW,
+};
+
+#define RSSI_THRESHOLD_COUNT 7
+const char* const rssi_threshold_text[RSSI_THRESHOLD_COUNT] = {
+    "-72db",
+    "-67db",
+    "-62db",
+    "-57db",
+    "-52db",
+    "-47db",
+    "-42db",
+};
+
+const int rssi_threshold_value[RSSI_THRESHOLD_COUNT] = {
+    -72,
+    -67,
+    -62,
+    -57,
+    -52,
+    -47,
+    -42,
 };
 
 uint8_t subghz_scene_receiver_config_next_frequency(const uint32_t value, void* context) {
@@ -94,14 +116,29 @@ uint8_t subghz_scene_receiver_config_detect_raw_value_index(
     return index;
 }
 
+uint8_t subghz_scene_receiver_config_rssi_threshold_value_index(
+    const int value,
+    const int values[],
+    uint8_t values_count) {
+    uint8_t index = 0;
+    for(uint8_t i = 0; i < values_count; i++) {
+        if(value == values[i]) {
+            index = i;
+            break;
+        }
+    }
+    return index;
+}
+
 static void subghz_scene_receiver_config_set_frequency(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     if(subghz->txrx->hopper_state == SubGhzHopperStateOFF) {
         char text_buf[10] = {0};
-        sprintf(
+        snprintf(
             text_buf,
+            sizeof(text_buf),
             "%lu.%02lu",
             subghz_setting_get_frequency(subghz->setting, index) / 1000000,
             (subghz_setting_get_frequency(subghz->setting, index) % 1000000) / 10000);
@@ -126,16 +163,28 @@ static void subghz_scene_receiver_config_set_preset(VariableItem* item) {
         subghz_setting_get_preset_data_size(subghz->setting, index));
 }
 
+static void subghz_scene_receiver_config_set_rssi_threshold(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, rssi_threshold_text[index]);
+    subghz_protocol_decoder_raw_set_rssi_threshold(
+        subghz_receiver_search_decoder_base_by_name(
+            subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME),
+        rssi_threshold_value[index]);
+}
+
 static void subghz_scene_receiver_config_set_detect_raw(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, detect_raw_text[index]);
     subghz_receiver_set_filter(subghz->txrx->receiver, detect_raw_value[index]);
+
     subghz_protocol_decoder_raw_set_auto_mode(
-        subghz_receiver_search_decoder_base_by_name(subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME),
-        (index == 1)
-    );
+        subghz_receiver_search_decoder_base_by_name(
+            subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME),
+        (index == 1));
 }
 
 static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) {
@@ -145,8 +194,9 @@ static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) 
     variable_item_set_current_value_text(item, hopping_text[index]);
     if(hopping_value[index] == SubGhzHopperStateOFF) {
         char text_buf[10] = {0};
-        sprintf(
+        snprintf(
             text_buf,
+            sizeof(text_buf),
             "%lu.%02lu",
             subghz_setting_get_default_frequency(subghz->setting) / 1000000,
             (subghz_setting_get_default_frequency(subghz->setting) % 1000000) / 10000);
@@ -199,8 +249,9 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         subghz->scene_manager, SubGhzSceneReceiverConfig, (uint32_t)item);
     variable_item_set_current_value_index(item, value_index);
     char text_buf[10] = {0};
-    sprintf(
+    snprintf(
         text_buf,
+        sizeof(text_buf),
         "%lu.%02lu",
         subghz_setting_get_frequency(subghz->setting, value_index) / 1000000,
         (subghz_setting_get_frequency(subghz->setting, value_index) % 1000000) / 10000);
@@ -233,7 +284,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         item, subghz_setting_get_preset_name(subghz->setting, value_index));
 
     if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-        SubGhzCustomEventManagerSet) {
+       SubGhzCustomEventManagerSet) {
         item = variable_item_list_add(
             subghz->variable_item_list,
             "Detect Raw:",
@@ -241,9 +292,28 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             subghz_scene_receiver_config_set_detect_raw,
             subghz);
         value_index = subghz_scene_receiver_config_detect_raw_value_index(
-            subghz_receiver_get_filter(subghz->txrx->receiver), detect_raw_value, DETECT_RAW_COUNT);
+            subghz_receiver_get_filter(subghz->txrx->receiver),
+            detect_raw_value,
+            DETECT_RAW_COUNT);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, detect_raw_text[value_index]);
+    }
+
+    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
+       SubGhzCustomEventManagerSet) {
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "RSSI for Raw:",
+            RSSI_THRESHOLD_COUNT,
+            subghz_scene_receiver_config_set_rssi_threshold,
+            subghz);
+        value_index = subghz_scene_receiver_config_rssi_threshold_value_index(
+            subghz_protocol_encoder_get_rssi_threshold(subghz_receiver_search_decoder_base_by_name(
+                subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME)),
+            rssi_threshold_value,
+            RSSI_THRESHOLD_COUNT);
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, rssi_threshold_text[value_index]);
     }
 
     if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
@@ -254,6 +324,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             subghz_scene_receiver_config_var_list_enter_callback,
             subghz);
     }
+
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdVariableItemList);
 }
 
