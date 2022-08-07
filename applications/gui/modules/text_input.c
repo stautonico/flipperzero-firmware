@@ -131,7 +131,9 @@ static bool char_is_lowercase(char letter) {
 }
 
 static char char_to_uppercase(const char letter) {
-    if(isalpha(letter)) {
+    if(letter == '_') {
+        return 0x20;
+    } else if(isalpha(letter)) {
         return (letter - 0x20);
     } else {
         return letter;
@@ -147,7 +149,7 @@ static void text_input_backspace_cb(TextInputModel* model) {
 
 static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     TextInputModel* model = _model;
-    uint8_t text_length = strlen(model->text_buffer);
+    uint8_t text_length = model->text_buffer ? strlen(model->text_buffer) : 0;
     uint8_t needed_string_width = canvas_width(canvas) - 8;
     uint8_t start_pos = 4;
 
@@ -230,7 +232,8 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
                     canvas_set_color(canvas, ColorBlack);
                 }
 
-                if(text_length == 0 && char_is_lowercase(keys[column].text)) {
+                if(model->clear_default_text ||
+                   (text_length == 0 && char_is_lowercase(keys[column].text))) {
                     canvas_draw_glyph(
                         canvas,
                         keyboard_origin_x + keys[column].x,

@@ -1,4 +1,5 @@
 #include <furi_hal.h>
+// #include <furi_hal_mpu.h>
 
 #include <stm32wbxx_ll_cortex.h>
 
@@ -35,6 +36,7 @@ void furi_hal_deinit_early() {
 }
 
 void furi_hal_init() {
+    // furi_hal_mpu_init();
     furi_hal_clock_init();
     furi_hal_console_init();
     furi_hal_rtc_init();
