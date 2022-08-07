@@ -116,8 +116,9 @@ TotpCalculationResult totp_generate_totp(const unsigned char* secret) {
 
     FURI_LOG_D("totp", "totp_generate_totp::Our new code is %d", newCode);
 
-    char* code_string = malloc(sizeof(char) * 6);
-    sprintf(code_string, "%06ld", newCode);
+    // 6 + \0
+    char* code_string = malloc(sizeof(char) * 7);
+    snprintf(code_string, sizeof(char) * 7, "%06ld", newCode);
 
     FURI_LOG_D("totp", "totp_generate_totp::Our sprintfed code is %s", code_string);
 

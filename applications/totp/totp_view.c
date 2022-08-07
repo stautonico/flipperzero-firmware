@@ -24,7 +24,7 @@ static void view_totp_draw_callback(Canvas* canvas, void* _model) {
 
         // +3 for the two quotes and the null terminator
         char* error_message = malloc(sizeof(char) * (strlen(model->entry.name) + 2) + 1);
-        sprintf(error_message, "\"%s\"", model->entry.name);
+        snprintf(error_message, sizeof(char) * (sizeof(model->entry.name) + 2) + 1, "\"%s\"", model->entry.name);
 
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(
@@ -39,9 +39,9 @@ static void view_totp_draw_callback(Canvas* canvas, void* _model) {
 
         // Write "second" if expiry is 1, "seconds" if expiry is > 1
         if(result.expires_in == 1) {
-            sprintf(expiry, "Expires in %d second", result.expires_in);
+            snprintf(expiry, sizeof(char) * 50, "Expires in %d second", result.expires_in);
         } else {
-            sprintf(expiry, "Expires in %d seconds", result.expires_in);
+            snprintf(expiry, sizeof(char) * 50, "Expires in %d seconds", result.expires_in);
         }
 
         // Change back to the normal font to draw the expiration time and account name
