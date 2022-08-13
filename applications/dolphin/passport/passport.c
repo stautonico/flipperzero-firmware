@@ -80,11 +80,13 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_draw_line(canvas, 58, 44, 123, 44);
 
     // const char* my_name = furi_hal_version_get_name_ptr();
-    const char* my_name = "H4x0r";
+    const char* my_name = "Orange Crewmate";
     snprintf(level_str, 20, "Level: %hu", stats->level);
     canvas_draw_str(canvas, 58, 12, my_name ? my_name : "Unknown");
-    canvas_draw_str(canvas, 58, 26, mood_str);
-    canvas_draw_str(canvas, 58, 40, level_str);
+//    canvas_draw_str(canvas, 58, 26, mood_str);
+    canvas_draw_str(canvas, 58, 26, "Mood: Sus");
+//    canvas_draw_str(canvas, 58, 40, level_str);
+    canvas_draw_str(canvas, 58, 40, "Level: 69");
 
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 123 - xp_progress, 47, xp_progress + 1, 6);

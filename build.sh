@@ -19,7 +19,7 @@ elif [ "$1" = "debug" ]; then
         script -e -f -a session.log -c "sudo screen /dev/ttyACM0 9600"
 
 elif [ "$1" = "clean" ]; then
-    rm -rf ./dist ./build
+    rm -rf ./dist ./build ./assets/compiled
 
 elif [ "$1" = "help" ]; then
     echo "./build.sh [args]"
