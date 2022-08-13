@@ -46,7 +46,8 @@ App(
         "APPS_MouseJiggler",
         "APPS_MouseJacker",
         "APPS_NRFSniff",
-        "dec_hex_converter"
+        "dec_hex_converter",
+        "APPS_paint"
     ],
 )
 
