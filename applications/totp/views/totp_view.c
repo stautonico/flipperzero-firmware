@@ -2,8 +2,8 @@
 
 //#include <toolbox/path.h>
 
-#include "totp_helpers.h"
-#include "totp_backend.h"
+#include "../totp_helpers.h"
+#include "../totp_backend.h"
 //#include "totp_backend/totp_backend.h"
 
 // Callbacks

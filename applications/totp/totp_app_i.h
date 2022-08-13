@@ -1,9 +1,11 @@
 #pragma once
 
+#include <stdbool.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
+
 
 typedef struct TotpKeyEntry {
     const char* name;
@@ -31,4 +33,4 @@ typedef struct ViewTotpModel {
     TotpKeyEntry entry;
 } ViewTotpModel; // State
 
-typedef enum { TotpViewStart, TotpViewKey } TotpViews;
+typedef enum { TotpViewStart, TotpViewKey, TotpViewAbout } TotpViews;

@@ -120,8 +120,6 @@ TotpCalculationResult totp_generate_totp(const unsigned char* secret) {
     char* code_string = malloc(sizeof(char) * 7);
     snprintf(code_string, sizeof(char) * 7, "%06ld", newCode);
 
-    FURI_LOG_D("totp", "totp_generate_totp::Our sprintfed code is %s", code_string);
-
     TotpCalculationResult result = {code_string, (29 - (date.tm_sec % 30)) + 1};
 
     return result;

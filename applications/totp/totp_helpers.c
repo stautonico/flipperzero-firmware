@@ -3,7 +3,7 @@
 #include "totp_app_i.h"
 
 #include "totp_app.h"
-#include "totp_view.h"
+#include "views/totp_view.h"
 #include "totp_config.h"
 
 #include <gui/modules/variable_item_list.h>
