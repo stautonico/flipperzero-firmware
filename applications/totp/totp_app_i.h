@@ -25,6 +25,7 @@ typedef struct TotpApp {
     ViewTotp* view_totp;
     VariableItemList* variable_item_list;
     Submenu* submenu;
+    TotpKeyEntry key_entries[32];
 
     // State goes here?
 } TotpApp;

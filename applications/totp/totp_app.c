@@ -46,7 +46,6 @@ void totp_init_keys_file(TotpApp* app) {
 
 bool totp_load_keys(TotpApp* app) {
     // Open the file
-
     Storage* storage = furi_record_open("storage");
 
     File* key_file = storage_file_alloc(storage);
@@ -60,9 +59,6 @@ bool totp_load_keys(TotpApp* app) {
         storage_file_open(key_file, key_file_path, FSAM_READ, FSOM_OPEN_EXISTING);
 
     FURI_LOG_D("totp", "totp_load_keys::Was file opened? %d", is_file_opened);
-
-    // Free before we forget
-    free(key_file_path);
 
     if(!is_file_opened) {
         FURI_LOG_D("totp", "totp_load_keys::Cannot open key file");
@@ -81,56 +77,90 @@ bool totp_load_keys(TotpApp* app) {
     // Once we hit a valid newline, we can parse the line and add it to the list of keys
     // If we hit EOF, we are done
     FURI_LOG_D("totp", "totp_load_keys::Allocating buffer");
-    const uint8_t buffer_size = 256;
+    const size_t buffer_size = 256;
     char* buf = malloc(sizeof(char) * buffer_size);
 
     bool ignore_line = false;
     uint32_t current_line = 0;
-    FURI_LOG_D("totp", "totp_load_keys::Allocating key list");
-    // Create a dynamic array of keys
-    // We can't use a fixed size array because we don't know how many keys we have
-//    char* key_lines = malloc(sizeof(char) * 128);
+    int current_field = 0;
+
+    // Limit to 32 entries (just for debugging)
+    TotpKeyEntry key_entries[32] = {0};
+//    TotpKeyEntry** key_entries = malloc(sizeof(TotpKeyEntry*) * 32);
 
     while(1) {
-        FURI_LOG_D("totp", "totp_load_keys::Reading line %d", current_line);
-        current_line++;
-        if (current_line > 100) {
-            FURI_LOG_D("totp", "totp_load_keys::Too many lines");
-            break;
-        }
         uint16_t bytes_read = storage_file_read(key_file, buf, buffer_size);
         FURI_LOG_D("totp", "totp_load_keys::Read %d bytes", bytes_read);
 
-//        if(bytes_read == 0) {
-//            break;
-//        }
-        //
-        //        //        for (uint8_t i; i < sizeof(buf); i++) {
-        //        //            if(buf[i] == '\n') {
-        //        //                ignore_line = false;
-        //        //            }
-        //        //
-        //        //            if(buf[i] == '#') {
-        //        //                ignore_line = true;
-        //        //            }
-        //        //
-        //        //            if (!ignore_line) {
-        //        //                if (buf[i] == '\n') {
-        //        //                    current_line++;
-        //        //                    key_lines[current_line] += '\0';
-        //        //                    key_lines = realloc(key_lines, (sizeof(char) * 128) * (current_line + 1));
-        //        //                } else {
-        //        //                    key_lines[current_line] += buf;
-        //        //                }
-        //        //            }
-        //        //        }
-        // Do something with the data?
-        //        FURI_LOG_D("totp", "totp_load_keys::%s", buf);
+        if(bytes_read == 0) {
+            break;
+        }
+        FURI_LOG_D("totp", "totp_load_keys::We read > 0 bytes");
+
+        for(size_t i; i < strlen(buf); i++) {
+            // For now, just ignore line number 1 and 2 (header and version)
+            if (current_line == 0 || current_line == 1) {
+                ignore_line = true;
+            }
+            if(buf[i] == '\n') {
+                FURI_LOG_D("totp", "totp_load_keys::We have a newline");
+                ignore_line = false;
+            }
+
+
+            if(buf[i] == '#') {
+                FURI_LOG_D("totp", "totp_load_keys::We have a comment, ignore until a newline");
+                ignore_line = true;
+            }
+
+            if(!ignore_line) {
+                if(buf[i] == '\n') {
+                    FURI_LOG_D("totp", "totp_load_keys::Found newline at %d", i);
+                    current_line++;
+                    // The struct can have a little memory, as a treat
+                    key_entries[current_line].name = malloc(sizeof(char) * 32);
+                    key_entries[current_line].secret = malloc(sizeof(char) * 32);
+                    key_entries[current_line].account = malloc(sizeof(char) * 32);
+                    key_entries[current_line].duration = malloc(sizeof(int) * 2);
+                    key_entries[current_line].code_size = malloc(sizeof(int) * 2);
+                } else {
+                    // TODO: Find a better way to do this
+                    if(buf[i] == ':') current_field++;
+
+                    FURI_LOG_D("totp", "totp_load_keys::Found %c at %d", buf[i], i);
+
+                    switch(current_field) {
+                    case 0:
+                        key_entries[current_line].name += buf[i];
+                        break;
+                    case 1:
+                        key_entries[current_line].secret += buf[i];
+                        break;
+                    case 2:
+                        key_entries[current_line].account += buf[i];
+                        break;
+                    case 3:
+                        key_entries[current_line].duration += buf[i];
+                        break;
+                    case 4:
+                        key_entries[current_line].code_size += buf[i];
+                        break;
+                    default:
+                        return false;
+                    }
+                }
+            }
+        }
     }
-    //
-    //    for(uint32_t i = 0; i < current_line + 1; i++) {
-    ////        FURI_LOG_D("totp", "totp_load_keys::%s", key_lines[i]);
-    //    }
+
+    // Assigning no workey, so we have to do it manually
+    // app->key_entries = key_entries;
+    for (int i = 0; i < current_line; i++) {
+        app->key_entries[i] = key_entries[i];
+    }
+
+    // Free before we forget
+    free(key_file_path);
 
     free(buf);
 

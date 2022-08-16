@@ -18,9 +18,9 @@ static void totp_select_key_callback(void* context, uint32_t index) {
     FURI_LOG_D("totp", "totp_select_key_callback::Setting up state");
     with_view_model(
         view_totp_get_view(app->view_totp), (ViewTotpModel * model) {
-            model->entry.name = totp_keys[index].name;
-            model->entry.secret = totp_keys[index].secret;
-            model->entry.account = totp_keys[index].account;
+            model->entry.name = app->key_entries[index].name;
+            model->entry.secret = app->key_entries[index].secret;
+            model->entry.account = app->key_entries[index].account;
 
             return NULL;
         });
@@ -34,8 +34,9 @@ void totp_make_key_list(TotpApp* app) {
     VariableItem* item;
     // Initialize state?
 
-    for(int i = 0; i < TOTP_KEY_COUNT; i++) {
-        submenu_add_item(app->submenu, totp_keys[i].name, i, totp_select_key_callback, app);
+    for(int i = 0; i < 32; i++) {
+//        submenu_add_item(app->submenu, totp_keys[i].name, i, totp_select_key_callback, app);
+        submenu_add_item(app->submenu, app->key_entries[i].name, i, totp_select_key_callback, app);
 
         //        item = variable_item_list_add(
         //            app->variable_item_list,
