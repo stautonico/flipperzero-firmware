@@ -34,8 +34,11 @@ void totp_make_key_list(TotpApp* app) {
     VariableItem* item;
     // Initialize state?
 
-    for(int i = 0; i < 32; i++) {
-//        submenu_add_item(app->submenu, totp_keys[i].name, i, totp_select_key_callback, app);
+    FURI_LOG_D("totp", "totp_make_key_list::Creating totp key list");
+    for(int i = 0; i < app->key_count; i++) {
+        //        submenu_add_item(app->submenu, totp_keys[i].name, i, totp_select_key_callback, app);
+        FURI_LOG_D(
+            "totp", "totp_make_key_list::Adding item #%d (%s)", i, app->key_entries[i].name);
         submenu_add_item(app->submenu, app->key_entries[i].name, i, totp_select_key_callback, app);
 
         //        item = variable_item_list_add(

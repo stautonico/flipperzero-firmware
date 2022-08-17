@@ -8,6 +8,11 @@
 #include <flipper_format/flipper_format.h>
 #include <stdbool.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
 static void totp_start_menu_callback(void* context, uint32_t index) {
     // Do something when pressing one of the keys on the start menu
 }
@@ -44,6 +49,54 @@ void totp_init_keys_file(TotpApp* app) {
     furi_record_close("storage");
 }
 
+char** str_split(char* a_str, const char a_delim)
+{
+    char** result    = 0;
+    size_t count     = 0;
+    char* tmp        = a_str;
+    char* last_comma = 0;
+    char delim[2];
+    delim[0] = a_delim;
+    delim[1] = 0;
+
+    /* Count how many elements will be extracted. */
+    while (*tmp)
+    {
+        if (a_delim == *tmp)
+        {
+            count++;
+            last_comma = tmp;
+        }
+        tmp++;
+    }
+
+    /* Add space for trailing token. */
+    count += last_comma < (a_str + strlen(a_str) - 1);
+
+    /* Add space for terminating null string so caller
+       knows where the list of returned strings ends. */
+    count++;
+
+    result = malloc(sizeof(char*) * count);
+
+    if (result)
+    {
+        size_t idx  = 0;
+        char* token = strtok(a_str, delim);
+
+        while (token)
+        {
+            assert(idx < count);
+            *(result + idx++) = strdup(token);
+            token = strtok(0, delim);
+        }
+        assert(idx == count - 1);
+        *(result + idx) = 0;
+    }
+
+    return result;
+}
+
 bool totp_load_keys(TotpApp* app) {
     // Open the file
     Storage* storage = furi_record_open("storage");
@@ -77,16 +130,9 @@ bool totp_load_keys(TotpApp* app) {
     // Once we hit a valid newline, we can parse the line and add it to the list of keys
     // If we hit EOF, we are done
     FURI_LOG_D("totp", "totp_load_keys::Allocating buffer");
-    const size_t buffer_size = 256;
+    size_t buffer_size = 1024;
     char* buf = malloc(sizeof(char) * buffer_size);
-
-    bool ignore_line = false;
-    uint32_t current_line = 0;
-    int current_field = 0;
-
-    // Limit to 32 entries (just for debugging)
-    TotpKeyEntry key_entries[32] = {0};
-//    TotpKeyEntry** key_entries = malloc(sizeof(TotpKeyEntry*) * 32);
+    bool first_alloc = true;
 
     while(1) {
         uint16_t bytes_read = storage_file_read(key_file, buf, buffer_size);
@@ -95,73 +141,56 @@ bool totp_load_keys(TotpApp* app) {
         if(bytes_read == 0) {
             break;
         }
-        FURI_LOG_D("totp", "totp_load_keys::We read > 0 bytes");
 
-        for(size_t i; i < strlen(buf); i++) {
-            // For now, just ignore line number 1 and 2 (header and version)
-            if (current_line == 0 || current_line == 1) {
-                ignore_line = true;
-            }
-            if(buf[i] == '\n') {
-                FURI_LOG_D("totp", "totp_load_keys::We have a newline");
-                ignore_line = false;
-            }
-
-
-            if(buf[i] == '#') {
-                FURI_LOG_D("totp", "totp_load_keys::We have a comment, ignore until a newline");
-                ignore_line = true;
-            }
-
-            if(!ignore_line) {
-                if(buf[i] == '\n') {
-                    FURI_LOG_D("totp", "totp_load_keys::Found newline at %d", i);
-                    current_line++;
-                    // The struct can have a little memory, as a treat
-                    key_entries[current_line].name = malloc(sizeof(char) * 32);
-                    key_entries[current_line].secret = malloc(sizeof(char) * 32);
-                    key_entries[current_line].account = malloc(sizeof(char) * 32);
-                    key_entries[current_line].duration = malloc(sizeof(int) * 2);
-                    key_entries[current_line].code_size = malloc(sizeof(int) * 2);
-                } else {
-                    // TODO: Find a better way to do this
-                    if(buf[i] == ':') current_field++;
-
-                    FURI_LOG_D("totp", "totp_load_keys::Found %c at %d", buf[i], i);
-
-                    switch(current_field) {
-                    case 0:
-                        key_entries[current_line].name += buf[i];
-                        break;
-                    case 1:
-                        key_entries[current_line].secret += buf[i];
-                        break;
-                    case 2:
-                        key_entries[current_line].account += buf[i];
-                        break;
-                    case 3:
-                        key_entries[current_line].duration += buf[i];
-                        break;
-                    case 4:
-                        key_entries[current_line].code_size += buf[i];
-                        break;
-                    default:
-                        return false;
-                    }
-                }
-            }
+        if(first_alloc) {
+            buf = realloc(buf, sizeof(char) * (bytes_read));
+            first_alloc = false;
+            buffer_size = bytes_read;
+        } else {
+            buffer_size += bytes_read;
+            buf = realloc(buf, sizeof(char) * buffer_size);
         }
     }
 
-    // Assigning no workey, so we have to do it manually
-    // app->key_entries = key_entries;
-    for (int i = 0; i < current_line; i++) {
-        app->key_entries[i] = key_entries[i];
+    char** split_lines = str_split(buf, '\n');
+
+    // Print out the lines (for debugging)
+    for(int i = 0; split_lines[i] != NULL; i++) {
+        FURI_LOG_D("totp", "totp_load_keys::Line %d: %s", i, split_lines[i]);
     }
 
-    // Free before we forget
-    free(key_file_path);
+    // TODO: Ignore comment lines
+    // TODO: Find the source of the crashing (crashes occasionally, seemingly random)
+    // TODO: Some basic debugging shows that sometimes, an additional line is read after the last line
+    // Check the `str_split` function to see if this is the cause? Maybe the read function?
+    // If we can't find the issue, maybe we should expect a "END" or "EOL" or something like that
+    // To indicate that we're at the end and ignore any content after that
 
+    // We expect the first two lines to be the header and version lines
+    // TODO: Validate the header and process as such
+
+    app->key_count = 0;
+    // Start at the third line (skip the header and version lines
+    for(int i = 2; split_lines[i] != NULL; i++) {
+        app->key_count++;
+        FURI_LOG_D("totp", "totp_load_keys::Line %d: %s", i, split_lines[i]);
+        char** split_fields = str_split(split_lines[i], ':');
+        FURI_LOG_D("totp", "Setting key entry #%d's name to %s", i, split_fields[0]);
+        app->key_entries[i-2].name = split_fields[0];
+        FURI_LOG_D("totp", "Setting key entry #%d's secret to %s", i, split_fields[1]);
+        app->key_entries[i-2].secret = split_fields[1];
+        FURI_LOG_D("totp", "Setting key entry #%d's account to %s", i, split_fields[2]);
+        app->key_entries[i-2].account = split_fields[2];
+        FURI_LOG_D("totp", "Setting key entry #%d's duration to %s (converted to int %d)", i, split_fields[3], atoi(split_fields[3]));
+        app->key_entries[i-2].duration = atoi(split_fields[3]);
+        FURI_LOG_D("totp", "Setting key entry #%d's code_size to %s (converted to int %d)", i, split_fields[4], atoi(split_fields[4]));
+        app->key_entries[i-2].code_size = atoi(split_fields[4]);
+        free(split_fields);
+    }
+
+
+    free(key_file_path);
+    free(split_lines);
     free(buf);
 
     storage_file_close(key_file);
@@ -197,10 +226,6 @@ TotpApp* totp_app_alloc() {
     view = submenu_get_view(app->submenu);
     view_set_previous_callback(view, totp_exit_callback);
     view_dispatcher_add_view(app->view_dispatcher, TotpViewStart, view);
-
-    // Make our list of keys
-    FURI_LOG_D("totp", "totp_app_alloc::Making our key list");
-    totp_make_key_list(app);
 
     FURI_LOG_D("totp", "totp_app_alloc::Done allocating!");
     return app;
@@ -240,6 +265,10 @@ int32_t totp_app(void* p) {
     FURI_LOG_D("totp", "Loading keys from disk...");
     //    totp_init_keys_file(app);
     totp_load_keys(app);
+
+    // Make our list of keys
+    FURI_LOG_D("totp", "totp_app_alloc::Making our key list");
+    totp_make_key_list(app);
 
     FURI_LOG_D("totp", "Starting to run...");
     int32_t status = totp_app_run(app);

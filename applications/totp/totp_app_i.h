@@ -25,7 +25,9 @@ typedef struct TotpApp {
     ViewTotp* view_totp;
     VariableItemList* variable_item_list;
     Submenu* submenu;
+    // TODO: Make this a dynamic array
     TotpKeyEntry key_entries[32];
+    int key_count;
 
     // State goes here?
 } TotpApp;
