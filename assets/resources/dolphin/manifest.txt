@@ -1,6 +1,62 @@
 Filetype: Flipper Animation Manifest
 Version: 1
 
+Name: L1_Eye_of_the_Flipper_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 5
+
+Name: L1_Mew_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 5
+
+Name: L1_Digi_rain_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: L1_Rickroll_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: L1_MjkDolphin_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 1
+
+Name: L1_Rukamon_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 1
+
+Name: L2_Rukamon_PC_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 3
+
+Name: L1_Agumon_128x64
+Min butthurt: 0
+Max butthurt: 10
+Min level: 1
+Max level: 30
+Weight: 5
+
 Name: L1_Waves_128x50
 Min butthurt: 0
 Max butthurt: 10
@@ -13,7 +69,7 @@ Min butthurt: 0
 Max butthurt: 10
 Min level: 1
 Max level: 30
-Weight: 5
+Weight: 4
 
 Name: L1_Sleep_128x64
 Min butthurt: 0
@@ -62,7 +118,7 @@ Min butthurt: 0
 Max butthurt: 10
 Min level: 1
 Max level: 30
-Weight: 5
+Weight: 4
 
 Name: L1_Cry_128x64
 Min butthurt: 0
@@ -76,7 +132,7 @@ Min butthurt: 0
 Max butthurt: 10
 Min level: 1
 Max level: 30
-Weight: 2
+Weight: 1
 
 Name: L1_Mad_fist_128x64
 Min butthurt: 0

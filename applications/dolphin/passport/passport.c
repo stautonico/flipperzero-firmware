@@ -6,25 +6,44 @@
 #include <gui/gui.h>
 #include <furi_hal_version.h>
 #include "dolphin/dolphin.h"
+#include "desktop/desktop_settings/desktop_settings_app.h"
 #include "math.h"
 
 #define MOODS_TOTAL 3
-#define BUTTHURT_MAX 3
+#define BUTTHURT_MAX 14
 
-static const Icon* const portrait_happy[BUTTHURT_MAX] = {
+static const Icon* const portrait_happy[MOODS_TOTAL] = {
     &I_passport_happy1_46x49,
     &I_passport_happy2_46x49,
     &I_passport_happy3_46x49};
-static const Icon* const portrait_ok[BUTTHURT_MAX] = {
+static const Icon* const portrait_ok[MOODS_TOTAL] = {
     &I_passport_okay1_46x49,
     &I_passport_okay2_46x49,
     &I_passport_okay3_46x49};
-static const Icon* const portrait_bad[BUTTHURT_MAX] = {
+static const Icon* const portrait_bad[MOODS_TOTAL] = {
     &I_passport_bad1_46x49,
     &I_passport_bad2_46x49,
     &I_passport_bad3_46x49};
 
 static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
+
+static const char* const moods[16] = {
+    "Stoned",
+    "Baked",
+    "Ripped",
+    "Joyful",
+    "Happy",
+    "Satisfied",
+    "Relaxed",
+    "Okay",
+    "Tired",
+    "Bored",
+    "Sad",
+    "Disappointed",
+    "Annoyed",
+    "Upset",
+    "Angry",
+    "Furious"};
 
 static void input_callback(InputEvent* input, void* ctx) {
     FuriSemaphore* semaphore = ctx;
@@ -36,26 +55,34 @@ static void input_callback(InputEvent* input, void* ctx) {
 
 static void render_callback(Canvas* canvas, void* ctx) {
     DolphinStats* stats = ctx;
+    DesktopSettings* desktop_settings = malloc(sizeof(DesktopSettings));
+    LOAD_DESKTOP_SETTINGS(desktop_settings);
 
-    char level_str[20];
-    char mood_str[32];
+    char level_str[12];
+    char xp_str[12];
+    char mood_str[20];
     uint8_t mood = 0;
-
+    uint8_t moodStrIndex = stats->butthurt;
+    if(desktop_settings->is_dumbmode) moodStrIndex = moodStrIndex + 4;
+    snprintf(mood_str, 20, "Mood: %s", moods[moodStrIndex]);
     if(stats->butthurt <= 4) {
         mood = 0;
-        snprintf(mood_str, 20, "Mood: Happy");
+        // snprintf(mood_str, 20, "Mood: Happy");
     } else if(stats->butthurt <= 9) {
-        mood = 1;
-        snprintf(mood_str, 20, "Mood: Ok");
+        mood = 0;
+        // mood = 1;
+        // snprintf(mood_str, 20, "Mood: Ok");
     } else {
-        mood = 2;
-        snprintf(mood_str, 20, "Mood: Angry");
+        mood = 0;
+        // mood = 2;
+        // snprintf(mood_str, 20, "Mood: Angry");
     }
 
     uint32_t xp_progress = 0;
     uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
-    uint32_t xp_for_current_level =
-        xp_to_levelup + dolphin_state_xp_above_last_levelup(stats->icounter);
+    uint32_t xp_above_last_levelup = dolphin_state_xp_above_last_levelup(stats->icounter);
+    uint32_t xp_for_current_level = xp_to_levelup + xp_above_last_levelup;
+
     if(stats->level == 30) {
         xp_progress = 0;
     } else {
@@ -75,18 +102,23 @@ static void render_callback(Canvas* canvas, void* ctx) {
     if(stats->level > 10) tmpLvl = 1;
     if(stats->level > 20) tmpLvl = 2;
     canvas_draw_icon(canvas, 9, 5, portraits[mood][tmpLvl]);
-    canvas_draw_line(canvas, 58, 16, 123, 16);
-    canvas_draw_line(canvas, 58, 30, 123, 30);
-    canvas_draw_line(canvas, 58, 44, 123, 44);
+    canvas_draw_line(canvas, 58, 14, 123, 14);
+    canvas_draw_line(canvas, 58, 26, 123, 26);
+    canvas_draw_line(canvas, 59, 46, 122, 46);
 
-    // const char* my_name = furi_hal_version_get_name_ptr();
-    const char* my_name = "Orange Crewmate";
-    snprintf(level_str, 20, "Level: %hu", stats->level);
-    canvas_draw_str(canvas, 58, 12, my_name ? my_name : "Unknown");
-//    canvas_draw_str(canvas, 58, 26, mood_str);
-    canvas_draw_str(canvas, 58, 26, "Mood: Sus");
-//    canvas_draw_str(canvas, 58, 40, level_str);
-    canvas_draw_str(canvas, 58, 40, "Level: 69");
+    const char* my_name = furi_hal_version_get_name_ptr();
+    // snprintf(level_str, 12, "Level: %hu", stats->level);
+    snprintf(level_str, 12, "Level: 69");
+    snprintf(xp_str, 12, "%lu/%lu", xp_above_last_levelup, xp_for_current_level);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 58, 12, "Orange Crewmate");
+    //canvas_draw_str(canvas, 58, 12, my_name ? my_name : "Unknown");
+    canvas_draw_str(canvas, 58, 24, mood_str);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_str(canvas, 58, 36, level_str);
+    canvas_set_font(canvas, FontBatteryPercent);
+    canvas_draw_str(canvas, 58, 44, xp_str);
+    canvas_set_font(canvas, FontSecondary);
 
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 123 - xp_progress, 47, xp_progress + 1, 6);

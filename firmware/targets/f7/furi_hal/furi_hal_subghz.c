@@ -1,6 +1,7 @@
 #include "furi_hal_subghz.h"
 #include "furi_hal_subghz_configs.h"
 
+#include <furi_hal_region.h>
 #include <furi_hal_version.h>
 #include <furi_hal_rtc.h>
 #include <furi_hal_gpio.h>
@@ -256,7 +257,7 @@ void furi_hal_subghz_rx() {
 }
 
 bool furi_hal_subghz_tx() {
-    if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
+    // if(furi_hal_subghz.regulation != SubGhzRegulationTxRx) return false;
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_switch_to_tx(&furi_hal_spi_bus_handle_subghz);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
@@ -319,17 +320,17 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     return true; // A free man doesn't ask permission
     //checking regional settings
-    bool is_allowed = false;
     bool is_extended = false;
+    bool is_allowed = false;
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(fff_data_file, "/ext/subghz/assets/extend_range.txt")) {
-        flipper_format_read_bool(fff_data_file, "ignore_default_tx_region", &is_allowed, 1);
         flipper_format_read_bool(fff_data_file, "use_ext_range_at_own_risk", &is_extended, 1);
+        flipper_format_read_bool(fff_data_file, "ignore_default_tx_region", &is_allowed, 1);
     }
     flipper_format_free(fff_data_file);
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
 
     switch(furi_hal_version_get_hw_region()) {
     case FuriHalVersionRegionEuRu:
@@ -386,11 +387,11 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
 }
 
 uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
-    // if(furi_hal_subghz_is_tx_allowed(value)) {
-    furi_hal_subghz.regulation = SubGhzRegulationTxRx;
-    // } else {
-    // furi_hal_subghz.regulation = SubGhzRegulationOnlyRx;
-    // }
+    if(furi_hal_region_is_frequency_allowed(value)) {
+        furi_hal_subghz.regulation = SubGhzRegulationTxRx;
+    } else {
+        furi_hal_subghz.regulation = SubGhzRegulationOnlyRx;
+    }
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     uint32_t real_frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, value);

@@ -41,6 +41,7 @@ typedef enum {
     FuriHalVersionRegionEuRu = 0x01,
     FuriHalVersionRegionUsCaAu = 0x02,
     FuriHalVersionRegionJp = 0x03,
+    FuriHalVersionRegionWorld = 0x04,
 } FuriHalVersionRegion;
 
 /** Device Display */
@@ -49,6 +50,14 @@ typedef enum {
     FuriHalVersionDisplayErc = 0x01,
     FuriHalVersionDisplayMgg = 0x02,
 } FuriHalVersionDisplay;
+
+/** Set Flipper Name
+ */
+//void furi_hal_version_set_name(const char* name);
+
+/** Set Custom Name
+ */
+void furi_hal_version_set_custom_name(const char* name);
 
 /** Init flipper version
  */

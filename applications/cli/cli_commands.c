@@ -15,7 +15,7 @@
 void cli_command_device_info_callback(const char* key, const char* value, bool last, void* context) {
     UNUSED(context);
     UNUSED(last);
-    printf("%-24s: %s\r\n", key, value);
+    printf("%-30s: %s\r\n", key, value);
 }
 
 /* 
@@ -152,7 +152,7 @@ void cli_command_log(Cli* cli, string_t args, void* context) {
     furi_hal_console_set_tx_callback(cli_command_log_tx_callback, ring);
 
     printf("Press CTRL+C to stop...\r\n");
-    while(!cli_cmd_interrupt_received(cli) && cli_is_connected(cli)) {
+    while(!cli_cmd_interrupt_received(cli)) {
         size_t ret = xStreamBufferReceive(ring, buffer, CLI_COMMAND_LOG_BUFFER_SIZE, 50);
         cli_write(cli, buffer, ret);
     }

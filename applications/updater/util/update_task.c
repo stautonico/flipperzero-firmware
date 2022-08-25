@@ -11,23 +11,23 @@
 
 static const char* update_task_stage_descr[] = {
     [UpdateTaskStageProgress] = "...",
-    [UpdateTaskStageReadManifest] = "Loading update manifest",
-    [UpdateTaskStageValidateDFUImage] = "Checking DFU file",
-    [UpdateTaskStageFlashWrite] = "Writing flash",
-    [UpdateTaskStageFlashValidate] = "Validating flash",
-    [UpdateTaskStageRadioImageValidate] = "Checking radio FW",
-    [UpdateTaskStageRadioErase] = "Uninstalling radio FW",
-    [UpdateTaskStageRadioWrite] = "Writing radio FW",
-    [UpdateTaskStageRadioInstall] = "Installing radio FW",
-    [UpdateTaskStageRadioBusy] = "Radio is updating",
-    [UpdateTaskStageOBValidation] = "Validating opt. bytes",
-    [UpdateTaskStageLfsBackup] = "Backing up LFS",
+    [UpdateTaskStageReadManifest] = "Loading Update Manifest",
+    [UpdateTaskStageValidateDFUImage] = "Checking DFU File",
+    [UpdateTaskStageFlashWrite] = "Writing Flash",
+    [UpdateTaskStageFlashValidate] = "Validating Flash",
+    [UpdateTaskStageRadioImageValidate] = "Checking Radio FW",
+    [UpdateTaskStageRadioErase] = "Uninstalling Radio FW",
+    [UpdateTaskStageRadioWrite] = "Writing Radio FW",
+    [UpdateTaskStageRadioInstall] = "Installing Radio FW",
+    [UpdateTaskStageRadioBusy] = "Radio Is Updating",
+    [UpdateTaskStageOBValidation] = "Validating Opt. Bytes",
+    [UpdateTaskStageLfsBackup] = "Backing Up LFS",
     [UpdateTaskStageLfsRestore] = "Restoring LFS",
-    [UpdateTaskStageResourcesUpdate] = "Updating resources",
-    [UpdateTaskStageSplashscreenInstall] = "Installing splashscreen",
+    [UpdateTaskStageResourcesUpdate] = "Updating Resources",
+    [UpdateTaskStageSplashscreenInstall] = "Installing Splashscreen",
     [UpdateTaskStageCompleted] = "Restarting...",
     [UpdateTaskStageError] = "Error",
-    [UpdateTaskStageOBError] = "OB, report",
+    [UpdateTaskStageOBError] = "OB, Report",
 };
 
 typedef struct {
@@ -170,8 +170,7 @@ static bool update_task_check_file_exists(UpdateTask* update_task, string_t file
     string_t tmp_path;
     string_init_set(tmp_path, update_task->update_path);
     path_append(tmp_path, string_get_cstr(filename));
-    bool exists =
-        (storage_common_stat(update_task->storage, string_get_cstr(tmp_path), NULL) == FSE_OK);
+    bool exists = storage_file_exists(update_task->storage, string_get_cstr(tmp_path));
     string_clear(tmp_path);
     return exists;
 }

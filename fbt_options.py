@@ -1,5 +1,7 @@
 import posixpath
 
+# For more details on these options, run 'fbt -h'
+
 
 # Default hardware target
 TARGET_HW = 7
@@ -12,7 +14,7 @@ DEBUG = 0
 
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
-DIST_SUFFIX = "local"
+DIST_SUFFIX = "RM420"
 
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"
@@ -58,6 +60,9 @@ SVD_FILE = "debug/STM32WB55_CM4.svd"
 
 # Look for blackmagic probe on serial ports and local network
 BLACKMAGIC = "auto"
+
+# Application to start on boot
+LOADER_AUTOSTART = ""
 
 FIRMWARE_APPS = {
     "default": [

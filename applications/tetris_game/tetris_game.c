@@ -6,6 +6,7 @@
 #include <string.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_gpio.h>
+#include <dolphin/dolphin.h>
 
 #define BORDER_OFFSET 1
 #define MARGIN_OFFSET 3
@@ -149,6 +150,10 @@ static void tetris_game_render_callback(Canvas* const canvas, void* ctx) {
 
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 4, 63, "Game Over");
+
+        if(tetris_state->numLines % 8 == 0 && tetris_state->numLines != 0) {
+            DOLPHIN_DEED(getRandomDeed());
+        }
 
         char buffer[13];
         snprintf(buffer, sizeof(buffer), "Lines: %u", tetris_state->numLines);
@@ -354,6 +359,7 @@ int32_t tetris_game_app() {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, tetris_state, sizeof(TetrisState))) {
         FURI_LOG_E("TetrisGame", "cannot create mutex\r\n");
+        furi_message_queue_free(event_queue);
         free(tetris_state);
         return 255;
     }
@@ -372,7 +378,7 @@ int32_t tetris_game_app() {
     view_port_input_callback_set(view_port, tetris_game_input_callback, event_queue);
 
     // Open GUI and register view_port
-    Gui* gui = furi_record_open("gui");
+    Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     tetris_state->timer =
@@ -459,7 +465,7 @@ int32_t tetris_game_app() {
     furi_timer_free(tetris_state->timer);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);

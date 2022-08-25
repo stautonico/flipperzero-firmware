@@ -52,6 +52,10 @@ build/
 # openocd output file
 openocd.log
 
+# PVS Studio temporary files
+.PVS-Studio/
+PVS-Studio.log
+
 qFlipper-x86_64.AppImage
 
 qFlipper.appimage

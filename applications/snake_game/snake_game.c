@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <dolphin/dolphin.h>
 
 typedef struct {
     //    +-----x
@@ -61,6 +62,20 @@ typedef struct {
     InputEvent input;
 } SnakeEvent;
 
+static const NotificationSequence sequence_short_vibro_and_rgb = {
+    &message_red_255,
+    &message_blue_255,
+    &message_green_255,
+    &message_vibro_on,
+    &message_delay_100,
+    &message_sound_off,
+    &message_vibro_off,
+    &message_red_0,
+    &message_blue_0,
+    &message_green_0,
+    NULL,
+};
+
 static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
     const SnakeState* snake_state = acquire_mutex((ValueMutex*)ctx, 25);
     if(snake_state == NULL) {
@@ -92,7 +107,6 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         snprintf(buffer2, sizeof(buffer2), "%u", snake_state->len - 7);
         canvas_draw_str_aligned(canvas, 124, 10, AlignRight, AlignBottom, buffer2);
     }
-
     // Game Over banner
     if(snake_state->state == GameStateGameOver) {
         // Screen is 128x64 px
@@ -104,6 +118,10 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
 
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 37, 31, "Game Over");
+
+        if((snake_state->len - 7) % 20 == 0 && (snake_state->len - 7) != 0) {
+            DOLPHIN_DEED(getRandomDeed());
+        }
 
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
@@ -239,7 +257,7 @@ static void snake_game_move_snake(SnakeState* const snake_state, Point const nex
     snake_state->points[0] = next_step;
 }
 
-static void snake_game_process_game_step(SnakeState* const snake_state) {
+static void snake_game_process_game_step(SnakeState* const snake_state, NotificationApp* notify) {
     if(snake_state->state == GameStateGameOver) {
         return;
     }
@@ -258,6 +276,7 @@ static void snake_game_process_game_step(SnakeState* const snake_state) {
             return;
         } else if(snake_state->state == GameStateLastChance) {
             snake_state->state = GameStateGameOver;
+            notification_message(notify, &sequence_single_vibro);
             return;
         }
     } else {
@@ -269,19 +288,18 @@ static void snake_game_process_game_step(SnakeState* const snake_state) {
     crush = snake_game_collision_with_tail(snake_state, next_step);
     if(crush) {
         snake_state->state = GameStateGameOver;
+        notification_message(notify, &sequence_single_vibro);
         return;
     }
 
     bool eatFruit = (next_step.x == snake_state->fruit.x) && (next_step.y == snake_state->fruit.y);
     if(eatFruit) {
-        NotificationApp* notification = furi_record_open("notification");
-        notification_message(notification, &sequence_single_vibro);
-        notification_message(notification, &sequence_blink_white_100);
-        furi_record_close("notification");
+        notification_message(notify, &sequence_short_vibro_and_rgb);
 
         snake_state->len++;
         if(snake_state->len >= MAX_SNAKE_LEN) {
             snake_state->state = GameStateGameOver;
+            notification_message(notify, &sequence_single_vibro);
             return;
         }
     }
@@ -305,6 +323,7 @@ int32_t snake_game_app(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, snake_state, sizeof(SnakeState))) {
         FURI_LOG_E("SnakeGame", "cannot create mutex\r\n");
+        furi_message_queue_free(event_queue);
         free(snake_state);
         return 255;
     }
@@ -320,6 +339,8 @@ int32_t snake_game_app(void* p) {
     // Open GUI and register view_port
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     SnakeEvent event;
     for(bool processing = true; processing;) {
@@ -355,7 +376,7 @@ int32_t snake_game_app(void* p) {
                     }
                 }
             } else if(event.type == EventTypeTick) {
-                snake_game_process_game_step(snake_state);
+                snake_game_process_game_step(snake_state, notification);
             }
         } else {
             // event timeout
@@ -369,6 +390,7 @@ int32_t snake_game_app(void* p) {
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
