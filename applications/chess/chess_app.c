@@ -415,7 +415,7 @@ static void make_move(uint8_t file1, uint8_t rank1, uint8_t file2, uint8_t rank2
     move2str(white_move_str, game, game->moveListLen - 1);
     notify_click();
     black_move_str[0] = 0;
-//    anim = furi_hal_get_tick();
+    anim = furi_hal_get_tick();
     thinking = true;
 }
 
@@ -430,7 +430,7 @@ static int32_t make_ai_move(void* context) {
     move2str(black_move_str, game, game->moveListLen - 1);
     notify_click();
     thinking = false;
-//    anim = furi_hal_get_tick();
+    anim = furi_hal_get_tick();
     return 0;
 }
 
@@ -506,7 +506,7 @@ static void chess_draw_callback(Canvas* canvas, void* ctx) {
         // }
 
         char str[28];
-        snprintf(str, sizeof(str), "%d. %s %s", (game->moveListLen + 1) / 2, white_move_str, black_move_str);
+        sprintf(str, "%d. %s %s", (game->moveListLen + 1) / 2, white_move_str, black_move_str);
         canvas_draw_str(canvas, 75, 12, str);
     }
 
@@ -524,8 +524,7 @@ static void chess_draw_callback(Canvas* canvas, void* ctx) {
                 int x = col * 8;
                 int y = row * 8;
 
-//                int dt = furi_hal_get_tick() - anim;
-                int dt = 100;
+                int dt = furi_hal_get_tick() - anim;
                 if(anim && dt >= 300) {
                     anim = 0;
                 }

@@ -747,9 +747,9 @@ void dumpContent(Game* game) {
     char* movelist = movelist2str(game);
 
     char filename[50];
-    snprintf(filename, sizeof(filename)+1, "chess_game_");
+    sprintf(filename, "chess_game_");
     getTimestamp(&filename[strlen(filename)]);
-    snprintf(&filename[strlen(filename)], sizeof(&filename[strlen(filename)])+1, ".txt");
+    sprintf(&filename[strlen(filename)], ".txt");
 
     FILE* file = fopen(filename, "w+");
 
@@ -767,9 +767,9 @@ void dumpContent(Game* game) {
 
 void dumpPGN(Game* game, char color, BOOL hasAI) {
     char filename[50];
-    snprintf(filename, sizeof(filename)+1, "chess_game_");
+    sprintf(filename, "chess_game_");
     getTimestamp(&filename[strlen(filename)]);
-    snprintf(&filename[strlen(filename)], sizeof(&filename[strlen(filename)])+1, ".pgn");
+    sprintf(&filename[strlen(filename)], ".pgn");
 
     FILE* file = fopen(filename, "w+");
 
@@ -848,10 +848,10 @@ void move2str(char* str, Game* game, int moveNumber) {
     if((leavingBB & (posBefore.board.whiteKing | posBefore.board.blackKing)) &&
        abs(leavingSquare - arrivingSquare) == 2) { // if castling
         if(arrivingBB & FILE_G) {
-            snprintf(str, sizeof(str)+1, "O-O");
+            sprintf(str, "O-O");
             length += 3;
         } else if(arrivingBB & FILE_C) {
-            snprintf(str, sizeof(str)+1, "O-O-O");
+            sprintf(str, "O-O-O");
             length += 5;
         }
     } else { // if not castling

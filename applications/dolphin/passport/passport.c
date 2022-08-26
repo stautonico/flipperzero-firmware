@@ -113,7 +113,8 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 58, 12, "Orange Crewmate");
     //canvas_draw_str(canvas, 58, 12, my_name ? my_name : "Unknown");
-    canvas_draw_str(canvas, 58, 24, mood_str);
+    // canvas_draw_str(canvas, 58, 24, mood_str);
+    canvas_draw_str(canvas, 58, 24, "Mood: Sus");
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_str(canvas, 58, 36, level_str);
     canvas_set_font(canvas, FontBatteryPercent);

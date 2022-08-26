@@ -46,9 +46,8 @@ static DialogMessageButton compliance_screen(DialogsApp* dialogs, DialogMessage*
     DialogMessageButton result;
 
     const char* screen_text = "For all compliance\n"
-                              "certificates please visit\n"
-                              "www.flipp.dev/compliance\n"
-                              "Amogus";
+                              "certificates please visit:\n"
+                              "www.flipp.dev/compliance";
 
     dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);

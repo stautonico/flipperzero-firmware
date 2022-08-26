@@ -5,20 +5,17 @@
 
 <b>Latest Updates:</b>
 
-- Known Issues: `FAP Loader` & `Chess`
-- Switched these apps to  `HIDDEN` for compile space, *they will be back*. HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
-- Switched these apps to  `HIDDEN` for compile space, *they will be back*. WiFi (Marauder), Mouse Jacker, Mouse Jiggler, NRF Sniffer & VideoPoker. (Or Stick To 0.65.1-0823-RM)
-- Removed conflicting RFID: Direct Emulation from [(atomsmasha)](https://github.com/flipperdevices/flipperzero-firmware/pull/1371)
-- Added [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
-- New universal projector remote and assets update Thanks to [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Updated [RFID Fuzzer (By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245)
-- New fixes & updates by [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
-- Fix for Name Changer [(Thanks to Painkiller8818)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/269)
-- OFW: [LFRFID RC fixes #1652 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1652)
-- OFW: [SubGhz: fix CAME, Chamberlain potocol #1650 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1650)
-- Switched VideoPoker to be set to `HIDDEN "GAME_VideoPoker"`
-- Updated UniRF to support more protocols [(Thanks to darmiel & xMasterX)](https://github.com/darmiel/flipper-playlist/blob/feat/unirf-protocols/applications/unirfremix/unirfremix_app.c)
-- Updates for backing up and restoring the new .power.settings.
+- Known Issues:			`FAP Loader` & `Chess`
+- Switched these apps to  `HIDDEN` for compile space, *they will be back*.
+- - HID Analyzer, Paint, Flappy Bird, Monty Hall & TicTacToe.
+- - WiFi (Marauder), Mouse Jacker, Mouse Jiggler, NRF Sniffer & VideoPoker. (Or Stick To 0.65.1-0823-RM)
+- Updates to Keeloq protocol, TV Universal Remote, UniRFRemix and RFID Fuzzer from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
+- Updated UniRF (Sub-GHz Remote) [(All protocols support, long button press support thanks to darmiel & xMasterX)](https://github.com/darmiel/flipper-playlist/blob/feat/unirf-protocols/applications/unirfremix/unirfremix_app.c)
+- Frequency Analyzer feedback modes [feedback mode (by darmiel)](https://github.com/darmiel/flipper-playlist/tree/feat/stealth-frequency-analyzer)
+- RFID EM4100 Fuzzer plugin (by Ganapati & some fixes by xMasterX)
+- OFW: [nfc: Change furi_assert to furi_crash for default switch cases #1662 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1662)
+- Hold back to exit Clock
+- New UniRF Icon from [Unleashed/xMasterX](https://github.com/Eng1n33r/flipperzero-firmware)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -130,7 +127,7 @@ $ ./fbt plugin_dist FIRMWARE_APP_SET=ext_apps
 - SubGHz: [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
 - SubGHz: Extended ranges enabled through flag in /ext/subghz/assets/extend_range.txt [from tkerrby](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/116)
 - SubGHz: Moved setting_user file to setting_user.txt! This makes it changable from IOS app. (By RogueMaster)
-- SubGHz: New frequency analyzer [(By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501)
+- SubGHz: New frequency analyzer [(By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501) [feedback mode (by darmiel)](https://github.com/darmiel/flipper-playlist/tree/feat/stealth-frequency-analyzer)
 - SubGHz: Protocols An-Motors, BFT Mitto, Came Atomo, FAAC SLH (Spa), HCS101, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/Eng1n33r/flipperzero-firmware)
 - SubGHz: Unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/extend_range.txt` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/subghz/assets/extend_range.txt) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 
