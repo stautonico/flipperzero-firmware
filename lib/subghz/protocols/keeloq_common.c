@@ -86,6 +86,7 @@ inline uint64_t
     data &= 0x0FFFFFFF;
     return (((uint64_t)data << 32) | data) ^ xor;
 }
+<<<<<<< HEAD
 
 /** Faac SLH (Spa) Learning
  * @param seed - seed number (32bit)
@@ -102,3 +103,33 @@ inline uint64_t
                    subghz_protocol_keeloq_common_encrypt(lsb, key);
     return man;
 }
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+=======
+
+/** Faac SLH (Spa) Learning
+ * @param seed - seed number (32bit)
+ * @param key - mfkey (64bit)
+ * @return man_learning for this seed number (64bit)
+ */
+
+inline uint64_t
+    subghz_protocol_keeloq_common_faac_learning(const uint32_t seed, const uint64_t key) {
+    uint16_t hs = seed >> 16;
+    const uint16_t ending = 0x544D;
+    uint32_t lsb = (uint32_t)hs << 16 | ending;
+    uint64_t man = (uint64_t)subghz_protocol_keeloq_common_encrypt(seed, key) << 32 |
+                   subghz_protocol_keeloq_common_encrypt(lsb, key);
+    return man;
+}
+/** Magic_serial_type1 Learning
+ * @param data - serial number (28bit)
+ * @param man - magic man (64bit)
+ * @return manufacture for this serial number (64bit)
+ */
+
+inline uint64_t
+    subghz_protocol_keeloq_common_magic_serial_type1_learning(uint32_t data, uint64_t man) {
+    return man | ((uint64_t)data << 40) |
+           ((uint64_t)(((data & 0xff) + ((data >> 8) & 0xFF)) & 0xFF) << 32);
+}
+>>>>>>> unleashed

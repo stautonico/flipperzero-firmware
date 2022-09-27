@@ -156,7 +156,15 @@ static void furi_hal_version_set_name(const char* name) {
 
     // BLE Mac address
     uint32_t udn = LL_FLASH_GetUDN();
+<<<<<<< HEAD
     udn = (uint32_t)*name;
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+=======
+    if(version_get_custom_name(NULL) != NULL) {
+        udn = *((uint32_t*)version_get_custom_name(NULL));
+    }
+
+>>>>>>> unleashed
     uint32_t company_id = LL_FLASH_GetSTCompanyID();
     uint32_t device_id = LL_FLASH_GetDeviceID();
     furi_hal_version.ble_mac[0] = (uint8_t)(udn & 0x000000FF);
@@ -180,6 +188,7 @@ static void furi_hal_version_load_otp_v0() {
     furi_hal_version.board_body = otp->board_body;
     furi_hal_version.board_connect = otp->board_connect;
 
+<<<<<<< HEAD
     furi_hal_version.cname = furi_hal_version_get_name_ptr();
     if(furi_hal_version.cname != NULL && strlen(furi_hal_version.cname) >= 1 &&
        strlen(furi_hal_version.cname) <= 8) {
@@ -187,6 +196,15 @@ static void furi_hal_version_load_otp_v0() {
     } else {
         furi_hal_version_set_name(otp->name);
     }
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+    furi_hal_version_set_name(otp->name);
+=======
+    if(version_get_custom_name(NULL) != NULL) {
+        furi_hal_version_set_name(version_get_custom_name(NULL));
+    } else {
+        furi_hal_version_set_name(otp->name);
+    }
+>>>>>>> unleashed
 }
 
 static void furi_hal_version_load_otp_v1() {
@@ -200,6 +218,7 @@ static void furi_hal_version_load_otp_v1() {
     furi_hal_version.board_color = otp->board_color;
     furi_hal_version.board_region = otp->board_region;
 
+<<<<<<< HEAD
     furi_hal_version.cname = furi_hal_version_get_name_ptr();
     if(furi_hal_version.cname != NULL && strlen(furi_hal_version.cname) >= 1 &&
        strlen(furi_hal_version.cname) <= 8) {
@@ -207,6 +226,15 @@ static void furi_hal_version_load_otp_v1() {
     } else {
         furi_hal_version_set_name(otp->name);
     }
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+    furi_hal_version_set_name(otp->name);
+=======
+    if(version_get_custom_name(NULL) != NULL) {
+        furi_hal_version_set_name(version_get_custom_name(NULL));
+    } else {
+        furi_hal_version_set_name(otp->name);
+    }
+>>>>>>> unleashed
 }
 
 static void furi_hal_version_load_otp_v2() {
@@ -226,6 +254,7 @@ static void furi_hal_version_load_otp_v2() {
     if(otp->board_color != 0xFF) {
         furi_hal_version.board_color = otp->board_color;
         furi_hal_version.board_region = otp->board_region;
+<<<<<<< HEAD
         furi_hal_version.cname = furi_hal_version_get_name_ptr();
         if(furi_hal_version.cname != NULL && strlen(furi_hal_version.cname) >= 1 &&
            strlen(furi_hal_version.cname) <= 8) {
@@ -233,6 +262,15 @@ static void furi_hal_version_load_otp_v2() {
         } else {
             furi_hal_version_set_name(otp->name);
         }
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+        furi_hal_version_set_name(otp->name);
+=======
+        if(version_get_custom_name(NULL) != NULL) {
+            furi_hal_version_set_name(version_get_custom_name(NULL));
+        } else {
+            furi_hal_version_set_name(otp->name);
+        }
+>>>>>>> unleashed
     } else {
         furi_hal_version.board_color = 0;
         furi_hal_version.board_region = 0;
@@ -318,7 +356,7 @@ uint8_t furi_hal_version_get_hw_connect() {
 }
 
 FuriHalVersionRegion furi_hal_version_get_hw_region() {
-    return furi_hal_version.board_region;
+    return FuriHalVersionRegionUnknown;
 }
 
 const char* furi_hal_version_get_hw_region_name() {
@@ -384,10 +422,17 @@ size_t furi_hal_version_uid_size() {
 }
 
 const uint8_t* furi_hal_version_uid() {
+<<<<<<< HEAD
     furi_hal_version.cname = furi_hal_version_get_name_ptr();
     if(furi_hal_version.cname != NULL && strlen(furi_hal_version.cname) >= 1 &&
        strlen(furi_hal_version.cname) <= 8) {
         return (const uint8_t*)((uint32_t)*furi_hal_version_get_name_ptr());
     }
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+=======
+    if(version_get_custom_name(NULL) != NULL) {
+        return (const uint8_t*)&(*((uint32_t*)version_get_custom_name(NULL)));
+    }
+>>>>>>> unleashed
     return (const uint8_t*)UID64_BASE;
 }

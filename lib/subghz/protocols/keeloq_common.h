@@ -21,7 +21,13 @@
 #define KEELOQ_LEARNING_NORMAL 2u
 #define KEELOQ_LEARNING_SECURE 3u
 #define KEELOQ_LEARNING_MAGIC_XOR_TYPE_1 4u
+<<<<<<< HEAD
 #define KEELOQ_LEARNING_FAAC 5u
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+=======
+#define KEELOQ_LEARNING_FAAC 5u
+#define KEELOQ_LEARNING_MAGIC_SERIAL_TYPE_1 6u
+>>>>>>> unleashed
 
 /**
  * Simple Learning Encrypt
@@ -64,6 +70,7 @@ uint64_t
  * @return manufacture for this serial number (64bit)
  */
 uint64_t subghz_protocol_keeloq_common_magic_xor_type1_learning(uint32_t data, uint64_t xor);
+<<<<<<< HEAD
 
 /** Faac SLH (Spa) Learning
  * @param seed - seed number (32bit)
@@ -71,3 +78,21 @@ uint64_t subghz_protocol_keeloq_common_magic_xor_type1_learning(uint32_t data, u
  * @return man_learning for this fix number (64bit)
  */
 uint64_t subghz_protocol_keeloq_common_faac_learning(const uint32_t seed, const uint64_t key);
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+=======
+
+/** Faac SLH (Spa) Learning
+ * @param seed - seed number (32bit)
+ * @param key - mfkey (64bit)
+ * @return man_learning for this fix number (64bit)
+ */
+uint64_t subghz_protocol_keeloq_common_faac_learning(const uint32_t seed, const uint64_t key);
+
+/** Magic_serial_type1 Learning
+ * @param data - serial number (28bit)
+ * @param man - magic man (64bit)
+ * @return manufacture for this serial number (64bit)
+ */
+
+uint64_t subghz_protocol_keeloq_common_magic_serial_type1_learning(uint32_t data, uint64_t man);
+>>>>>>> unleashed

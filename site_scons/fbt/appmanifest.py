@@ -37,11 +37,30 @@ class FlipperApplication:
     stack_size: int = 2048
     icon: Optional[str] = None
     order: int = 0
+<<<<<<< HEAD
     sdk_headers: List[str] = field(default_factory=list)
     version: Tuple[int] = field(default_factory=lambda: (0, 0))
     fapp_icon: Optional[str] = None
     _appdir: Optional[str] = None
     _apppath: Optional[str] = None
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+    _appdir: Optional[str] = None
+=======
+    link: Optional[str] = ""
+    sdk_headers: List[str] = field(default_factory=list)
+    # .fap-specific
+    sources: List[str] = field(default_factory=lambda: ["*.c*"])
+    fap_version: Tuple[int] = field(default_factory=lambda: (0, 0))
+    fap_icon: Optional[str] = None
+    fap_libs: List[str] = field(default_factory=list)
+    fap_category: str = ""
+    fap_description: str = ""
+    fap_author: str = ""
+    fap_weburl: str = ""
+    # Internally used by fbt
+    _appdir: Optional[object] = None
+    _apppath: Optional[str] = None
+>>>>>>> unleashed
 
 
 class AppManager:
@@ -56,7 +75,13 @@ class AppManager:
                 f"Missing application manifest for '{appname}'"
             )
 
-    def load_manifest(self, app_manifest_path: str, app_dir_name: str):
+    def find_by_appdir(self, appdir: str):
+        for app in self.known_apps.values():
+            if app._appdir.name == appdir:
+                return app
+        return None
+
+    def load_manifest(self, app_manifest_path: str, app_dir_node: object):
         if not os.path.exists(app_manifest_path):
             raise FlipperManifestException(
                 f"App manifest not found at path {app_manifest_path}"
@@ -67,6 +92,7 @@ class AppManager:
 
         def App(*args, **kw):
             nonlocal app_manifests
+<<<<<<< HEAD
             app_manifests.append(
                 FlipperApplication(
                     *args,
@@ -75,6 +101,18 @@ class AppManager:
                     _apppath=os.path.dirname(app_manifest_path),
                 ),
             )
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+            app_manifests.append(FlipperApplication(*args, **kw, _appdir=app_dir_name))
+=======
+            app_manifests.append(
+                FlipperApplication(
+                    *args,
+                    **kw,
+                    _appdir=app_dir_node,
+                    _apppath=os.path.dirname(app_manifest_path),
+                ),
+            )
+>>>>>>> unleashed
 
         try:
             with open(app_manifest_path, "rt") as manifest_file:
@@ -186,6 +224,7 @@ class AppBuildset:
             cdefs.update(app.cdefines)
         return sorted(list(cdefs))
 
+<<<<<<< HEAD
     def get_sdk_headers(self):
         sdk_headers = []
         for app in self.apps:
@@ -195,18 +234,36 @@ class AppBuildset:
         return sdk_headers
 
     def get_apps_of_type(self, apptype: FlipperAppType):
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+    def get_apps_of_type(self, apptype: FlipperAppType):
+=======
+    def get_sdk_headers(self):
+        sdk_headers = []
+        for app in self.apps:
+            sdk_headers.extend([app._appdir.File(header) for header in app.sdk_headers])
+        return sdk_headers
+
+    def get_apps_of_type(self, apptype: FlipperAppType, all_known: bool = False):
+>>>>>>> unleashed
         return sorted(
-            filter(lambda app: app.apptype == apptype, self.apps),
+            filter(
+                lambda app: app.apptype == apptype,
+                self.appmgr.known_apps.values() if all_known else self.apps,
+            ),
             key=lambda app: app.order,
+        )
+
+    def get_builtin_apps(self):
+        return list(
+            filter(lambda app: app.apptype in self.BUILTIN_APP_TYPES, self.apps)
         )
 
     def get_builtin_app_folders(self):
         return sorted(
             set(
-                app._appdir
-                for app in filter(
-                    lambda app: app.apptype in self.BUILTIN_APP_TYPES, self.apps
-                )
+                (app._appdir, source_type)
+                for app in self.get_builtin_apps()
+                for source_type in app.sources
             )
         )
 
@@ -240,6 +297,7 @@ class ApplicationsCGenerator:
      .name = "{app.name}",
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
+     .link = "{f"{app.link}" if app.link else "NULL"}",
      .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)} }}"""
 
     def generate(self):

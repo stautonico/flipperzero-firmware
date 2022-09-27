@@ -109,7 +109,13 @@ def generate(env):
         BUILDERS={
             "IconBuilder": Builder(
                 action=Action(
+<<<<<<< HEAD
                     "${PYTHON3} ${ASSETS_COMPILER} icons ${ICON_SRC_DIR} ${TARGET.dir}",
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+                    '${PYTHON3} "${ASSETS_COMPILER}" icons ${SOURCE.posix} ${TARGET.dir.posix}',
+=======
+                    '${PYTHON3} "${ASSETS_COMPILER}" icons ${ICON_SRC_DIR} ${TARGET.dir}',
+>>>>>>> unleashed
                     "${ICONSCOMSTR}",
                 ),
                 emitter=icons_emitter,

@@ -14,7 +14,13 @@ DEBUG = 0
 
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
+<<<<<<< HEAD
 DIST_SUFFIX = "RM420"
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+DIST_SUFFIX = "local"
+=======
+DIST_SUFFIX = "RM420FAP"
+>>>>>>> unleashed
 
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"
@@ -66,16 +72,26 @@ LOADER_AUTOSTART = ""
 
 FIRMWARE_APPS = {
     "default": [
-        "crypto_start",
         # Svc
         "basic_services",
         # Apps
+<<<<<<< HEAD
         "basic_apps",
         "updater_app",
         "archive",
         # Custom Apps
         "custom_apps",
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+        "basic_apps",
+        "updater_app",
+        "storage_move_to_sd",
+        "archive",
+=======
+        "main_apps",
+        "system_apps",
+>>>>>>> unleashed
         # Settings
+<<<<<<< HEAD
         "passport",
         "system_settings",
         "about",
@@ -84,13 +100,33 @@ FIRMWARE_APPS = {
         "custom_games",
         # WIFI Plugins
         "wifi_plugins",
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+        "passport",
+        "system_settings",
+        "about",
+        # Plugins
+        "basic_plugins",
+=======
+        "settings_apps",
+        # Stock plugins - no longer built into fw, now they're .faps
+        # Yet you can still build them as a part of fw
+        # "basic_plugins",
+>>>>>>> unleashed
         # Debug
-        "debug_apps",
+        # "debug_apps",
     ],
-    "unit_tests": [
+    "debug_pack": [
+        # Svc
         "basic_services",
-        "updater_app",
-        "unit_tests",
+        # Apps
+        "main_apps_default",
+        "system_apps",
+        # Settings
+        "settings_apps",
+        # Plugins
+        # "basic_plugins",
+        # Debug
+        # "debug_apps",
     ],
     "ext_apps": [
         "basic_services",

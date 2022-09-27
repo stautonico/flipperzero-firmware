@@ -15,6 +15,7 @@ env.Append(
         "lib/u8g2",
         "lib/update_util",
         "lib/print",
+<<<<<<< HEAD
     ],
     SDK_HEADERS=[
         File("#/lib/one_wire/one_wire_host_timing.h"),
@@ -24,6 +25,20 @@ env.Append(
         File("#/lib/one_wire/ibutton/ibutton_worker.h"),
         File("#/lib/one_wire/maxim_crc.h"),
     ],
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+    ]
+=======
+    ],
+    SDK_HEADERS=[
+        File("#/lib/one_wire/one_wire_host_timing.h"),
+        File("#/lib/one_wire/one_wire_host.h"),
+        File("#/lib/one_wire/one_wire_slave.h"),
+        File("#/lib/one_wire/one_wire_device.h"),
+        File("#/lib/one_wire/ibutton/ibutton_worker.h"),
+        File("#/lib/one_wire/maxim_crc.h"),
+        File("#/lib/u8g2/u8g2.h"),
+    ],
+>>>>>>> unleashed
 )
 
 env.Append(
@@ -84,9 +99,15 @@ libs = env.BuildModules(
         "nfc",
         "appframe",
         "misc",
+<<<<<<< HEAD
         "loclass",
         "flipper_application",
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+        "loclass",
+=======
+>>>>>>> unleashed
         "lfrfid",
+        "flipper_application",
     ],
 )
 

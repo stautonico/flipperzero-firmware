@@ -1,5 +1,5 @@
 #
-# Main Fipper Build System entry point
+# Main Flipper Build System entry point
 #
 # This file is evaluated by scons (the build system) every time fbt is invoked.
 # Scons constructs all referenced environments & their targets' dependency
@@ -16,7 +16,7 @@ EnsurePythonVersion(3, 8)
 # Progress(["OwO\r", "owo\r", "uwu\r", "owo\r"], interval=15)
 
 
-# This environment is created only for loading options & validating file/dir existance
+# This environment is created only for loading options & validating file/dir existence
 fbt_variables = SConscript("site_scons/commandline.scons")
 cmd_environment = Environment(tools=[], variables=fbt_variables)
 Help(fbt_variables.GenerateHelpText(cmd_environment))
@@ -44,6 +44,8 @@ distenv = coreenv.Clone(
         "target extended-remote ${GDBREMOTE}",
         "-ex",
         "set confirm off",
+        "-ex",
+        "set pagination off",
     ],
     GDBOPTS_BLACKMAGIC=[
         "-ex",
@@ -58,6 +60,8 @@ distenv = coreenv.Clone(
     GDBPYOPTS=[
         "-ex",
         "source debug/FreeRTOS/FreeRTOS.py",
+        "-ex",
+        "source debug/flipperapps.py",
         "-ex",
         "source debug/PyCortexMDebug/PyCortexMDebug.py",
         "-ex",
@@ -161,6 +165,7 @@ if GetOption("fullenv") or any(
 basic_dist = distenv.DistCommand("fw_dist", distenv["DIST_DEPENDS"])
 distenv.Default(basic_dist)
 
+<<<<<<< HEAD
 dist_dir = distenv.GetProjetDirName()
 plugin_dist = [
     distenv.Install(
@@ -173,6 +178,31 @@ plugin_dist = [
 Alias("plugin_dist", plugin_dist)
 # distenv.Default(plugin_dist)
 
+||||||| [FL-2764] SubGhz: fix CAME, Chamberlain potocol (#1650)
+=======
+dist_dir = distenv.GetProjetDirName()
+plugin_dist = [
+    distenv.Install(
+        f"#/dist/{dist_dir}/apps/debug_elf",
+        firmware_env["FW_EXTAPPS"]["debug"].values(),
+    ),
+    *(
+        distenv.Install(f"#/dist/{dist_dir}/apps/{dist_entry[0]}", dist_entry[1])
+        for dist_entry in firmware_env["FW_EXTAPPS"]["dist"].values()
+    ),
+]
+Depends(plugin_dist, firmware_env["FW_EXTAPPS"]["validators"].values())
+Alias("plugin_dist", plugin_dist)
+# distenv.Default(plugin_dist)
+
+plugin_resources_dist = list(
+    distenv.Install(f"#/assets/resources/apps/{dist_entry[0]}", dist_entry[1])
+    for dist_entry in firmware_env["FW_EXTAPPS"]["dist"].values()
+)
+distenv.Depends(firmware_env["FW_RESOURCES"], plugin_resources_dist)
+
+
+>>>>>>> unleashed
 # Target for bundling core2 package for qFlipper
 copro_dist = distenv.CoproBuilder(
     distenv.Dir("assets/core2_firmware"),
@@ -222,9 +252,18 @@ distenv.PhonyTarget(
 distenv.PhonyTarget(
     "debug_other",
     "${GDBPYCOM}",
-    GDBPYOPTS='-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" ',
+    GDBOPTS="${GDBOPTS_BASE}",
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
+    GDBPYOPTS='-ex "source debug/PyCortexMDebug/PyCortexMDebug.py" ',
 )
+
+distenv.PhonyTarget(
+    "debug_other_blackmagic",
+    "${GDBPYCOM}",
+    GDBOPTS="${GDBOPTS_BASE}  ${GDBOPTS_BLACKMAGIC}",
+    GDBREMOTE="$${BLACKMAGIC_ADDR}",
+)
+
 
 # Just start OpenOCD
 distenv.PhonyTarget(
@@ -253,7 +292,6 @@ firmware_env.Append(
         "site_scons",
         "scripts",
         # Extra files
-        "applications/extapps.scons",
         "SConstruct",
         "firmware.scons",
         "fbt_options.py",

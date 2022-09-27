@@ -28,9 +28,9 @@
 [submodule "lib/mbedtls"]
 	path = lib/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git
-[submodule "lib/cxxheaderparser"]
-	path = lib/cxxheaderparser
-	url = https://github.com/robotpy/cxxheaderparser.git
 [submodule "applications/tama_p1/tamalib"]
 	path = applications/tama_p1/tamalib
 	url = https://github.com/jcrona/tamalib.git
+[submodule "lib/cxxheaderparser"]
+	path = lib/cxxheaderparser
+	url = https://github.com/robotpy/cxxheaderparser.git
